@@ -101,14 +101,24 @@ svg text{font-family:"IBM Plex Mono",monospace;font-size:13px;fill:var(--ink);pa
 .note{font-size:15px;background:var(--panel);border-radius:10px;padding:10px 14px}
 .quiz{background:var(--ink);color:var(--bg);border-radius:18px;padding:clamp(18px,3vw,32px);margin:28px 0 10px}
 .quiz h2{color:var(--bg)}
-.q{border-top:1px solid #ffffff2a;padding:16px 0}
+.q{border-top:1px solid color-mix(in srgb,var(--bg) 22%,transparent);padding:16px 0}
 .q:first-of-type{border-top:0}
-.q .qt{font-weight:700;margin-bottom:10px}
-.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(15em,1fr));gap:8px}
-.opts button{min-height:46px;text-align:start;padding:8px 12px;border-radius:10px;border:1px solid #ffffff40;background:transparent;color:inherit;font:inherit;font-size:15.5px;cursor:pointer}
+.q .qt{font-weight:700;margin-bottom:12px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opts button{display:flex;align-items:center;gap:12px;min-height:54px;text-align:start;padding:10px 14px;border-radius:12px;border:1.5px solid color-mix(in srgb,var(--bg) 38%,transparent);background:color-mix(in srgb,var(--bg) 8%,transparent);color:inherit;font:inherit;font-size:15.5px;line-height:1.45;cursor:pointer;transition:border-color .15s,background .15s}
+.opts button .k{flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--bg) 55%,transparent);font-weight:700;font-size:14px}
+.opts button:hover{border-color:var(--y);background:color-mix(in srgb,var(--bg) 14%,transparent)}
 .opts button.pick{background:var(--y);color:var(--yink);border-color:var(--y)}
+.opts button.pick .k{background:var(--yink);color:var(--y);border-color:var(--yink)}
 .opts button.right{background:#2e9d52;color:#fff;border-color:#2e9d52}
 .opts button.wrong{background:#c33;color:#fff;border-color:#c33}
+.opts button.right .k,.opts button.wrong .k{background:#fff;border-color:#fff}
+.opts button.right .k{color:#2e9d52}
+.opts button.wrong .k{color:#c33}
+.q .qt{display:flex;gap:10px;align-items:baseline}
+.q .qt .n{flex:none;display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:8px;background:var(--y);color:var(--yink);font-size:14px}
+.q{padding:20px 0}
+@media(max-width:600px){.opts{grid-template-columns:minmax(0,1fr)}}
 .q .ex{margin-top:8px;font-size:15px;opacity:.9;display:none}
 .q.shown .ex{display:block}
 .qres{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px}
@@ -829,11 +839,11 @@ const rail=()=>{$('#rail').innerHTML=L.map((l,i)=>`<button class="chip ${i===cur
  const on=$('#rail .chip.on');if(on)on.scrollIntoView({block:'nearest',inline:'nearest'})};
 let cur=0;
 function quizHTML(i){const q=L[i].quiz;return`<section class="quiz" id="quiz"><h2>اختبار الدرس ${i+1}</h2><p>جاوب على ${q.length} أسئلة. لازم ${need(q)} صح على الأقل عشان ${i<6?'ينفتح الدرس الجاي':'تخلّص المختبر'}.${store.best[i]?` أفضل نتيجة إلك: ${store.best[i]} / ${q.length}`:''}</p>
-${q.map((x,k)=>`<div class="q" data-k="${k}"><div class="qt">${k+1}. ${x.q}</div><div class="opts">${x.o.map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div><div class="ex">${x.e}</div></div>`).join('')}
+${q.map((x,k)=>`<div class="q" data-k="${k}"><div class="qt"><span class="n">${k+1}</span><span>${x.q}</span></div><div class="opts">${x.o.map((o,j)=>`<button data-j="${j}"><span class="k">${'أبجد'[j]}</span><span>${o}</span></button>`).join('')}</div><div class="ex">${x.e}</div></div>`).join('')}
 <div class="qres"><button class="b main" id="check">صحّح</button><button class="b" id="retry" style="display:none">جرّب مرة ثانية</button><span class="score" id="score"></span><span id="qmsg"></span></div></section>`}
 function bindQuiz(i){const q=L[i].quiz,ans=new Array(q.length).fill(-1);let done=false;
  $$('#quiz .q').forEach(el=>{const k=+el.dataset.k;$$('.opts button',el).forEach(b=>b.onclick=()=>{if(done)return;ans[k]=+b.dataset.j;$$('.opts button',el).forEach(x=>x.classList.toggle('pick',x===b))})});
- $('#check').onclick=()=>{if(ans.includes(-1)){toast('في أسئلة لسا ما جاوبتها');return}done=true;let s=0;$$('#quiz .q').forEach(el=>{const k=+el.dataset.k;el.classList.add('shown');$$('.opts button',el).forEach(b=>{const j=+b.dataset.j;b.classList.remove('pick');if(j===q[k].a)b.classList.add('right');else if(j===ans[k])b.classList.add('wrong')});if(ans[k]===q[k].a)s++});
+ $('#check').onclick=()=>{if(ans.includes(-1)){toast('في أسئلة لسا ما جاوبتها');return}done=true;let s=0;$$('#quiz .q').forEach(el=>{const k=+el.dataset.k;el.classList.add('shown');$$('.opts button',el).forEach(b=>{const j=+b.dataset.j;b.classList.remove('pick');if(j===q[k].a){b.classList.add('right');b.querySelector('.k').textContent='✓'}else if(j===ans[k]){b.classList.add('wrong');b.querySelector('.k').textContent='✗'}});if(ans[k]===q[k].a)s++});
   store.best[i]=Math.max(store.best[i]||0,s);const ok=s>=need(q);$('#score').textContent=`${s} / ${q.length}`;$('#check').style.display='none';$('#retry').style.display='';
   if(ok){const first=!store.passed[i];if(first)track(`pass-lesson-${i+1}`,`نجح بدرس ${i+1}`);store.passed[i]=true;save();rail();$('#qmsg').innerHTML=i<6?`ممتاز، فاهم الدرس. <button class="b main" id="next">الدرس ${i+2}: ${L[i+1].t} ←</button>`:'خلّصت المختبر كله. راجع الأسئلة اللي غلطت فيها قبل الامتحان.';const n=$('#next');if(n)n.onclick=()=>go(i+1);if(first&&i<6)toast(`انفتح الدرس ${i+2}`)}
   else{save();$('#qmsg').textContent=`بدك ${need(q)} على الأقل. اقرأ الشرح تحت كل سؤال غلط، ارجع للأداة، وجرب مرة ثانية.`}};
