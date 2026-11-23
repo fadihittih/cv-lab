@@ -288,7 +288,7 @@ ${range('cr','R',0,255,255)}${range('cg','G',0,255,125)}${range('cb','B',0,255,0
 <div class="sec"><div>
 <h3>حجم الصورة بدون ضغط ⭐</h3>
 <p class="mono">bytes = W × H × bits per pixel / 8</p>
-<p>أو <span class="mono">W × H × bytes per pixel</span>. الأشهر: 24-bit RGB = 3 bytes للـ pixel. للفيديو اضرب بعدد الـ frames بالثانية.</p>
+<p>أو <span class="mono">W × H × bytes per pixel</span>. الأشهر: 24-bit RGB = 3 قنوات × 1 byte = <b>3 bytes للـ pixel</b>، فبتضرب بـ 3 بدل ما تضرب بـ 24 وتقسم على 8. للفيديو اضرب بعدد الـ frames بالثانية.</p>
 <p class="note">⚠️ <b>Image dimensions</b> = عرض × ارتفاع بالبكسل. <b>Image resolution</b> بالمحاضرة 2 = PPI / DPI (بكسل لكل إنش).</p>
 <p class="mute">جرب أمثلة السلايدات بالأزرار.</p>
 </div><div class="lab">
@@ -331,7 +331,7 @@ quiz:[
 {q:'كم لون بتعرض صورة 24-bit RGB؟',o:['65,536','16,777,216','256','4,294,967,296'],a:1,e:'256³ = 2²⁴ = 16,777,216.'},
 {q:'حسب Lecture 2، الـ Image resolution هي:',o:['عدد البكسلات بالعرض فقط','عدد البكسلات لكل إنش (PPI / DPI)','عدد الـ bits لكل pixel','عدد القنوات'],a:1,e:'Dimensions = W×H، Resolution = PPI/DPI.'},
 {q:'Pixel بـ 2 bits بيقدر ياخذ كم لون؟',o:['2','3','4','8'],a:2,e:'2² = 4 (00, 01, 10, 11).'},
-{q:'Full HD RGB frame (1920×1080، 8 bits لكل قناة) حجمه الخام:',o:['2,073,600 B','6,220,800 B','49,766,400 B','4,147,200 B'],a:1,e:'1920 × 1080 × 3 = 6,220,800 B. والـ 49,766,400 هي bits مش bytes.'}
+{q:'Full HD RGB frame (1920×1080، 8 bits لكل قناة) حجمه الخام:',o:['2,073,600 B','6,220,800 B','49,766,400 B','4,147,200 B'],a:1,e:'الـ 3 هي عدد الـ bytes لكل pixel: الصورة RGB فيها 3 قنوات (R و G و B)، وكل قناة 8 bits = 1 byte، يعني 3 × 1 = 3 bytes. فالحجم = 1920 × 1080 × 3 = 6,220,800 B. ونفس الإشي لو حسبتها بالـ bits: 1920 × 1080 × 24 = 49,766,400 bits، وبنقسمها على 8 عشان تصير bytes.'}
 ]});
 
 /* ===== Lesson 3 ===== */
