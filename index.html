@@ -134,7 +134,7 @@ footer{color:var(--mute);font-size:14px}
 <nav class="rail" aria-label="الدروس"><div class="wrap" id="rail"></div></nav>
 <main class="band"><div class="wrap" id="main"></div></main>
 <footer class="band"><div class="wrap" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center">
-  <span>مبني على سلايدات Dr. Osama Al Sayaydeh، المحاضرات 1 لحد 7. الصور بالأدوات مرسومة بالكود كأمثلة.</span>
+  <span>مبني على سلايدات Dr. Osama Al Sayaydeh، المحاضرات 1 لحد 7. الصور بالأدوات مرسومة بالكود كأمثلة. الصفحة بتعد الزيارات والدروس المنجزة بشكل مجهول، بدون أسماء.</span>
   <button class="b" id="reset">ابدأ من الأول</button>
 </div></footer>
 <div class="toast" id="toast" role="status"></div>
@@ -162,6 +162,9 @@ const bindR=(root,id,fn)=>{const e=$('#'+id,root),o=$('#'+id+'o',root);const h=(
 
 /* ---------- lessons ---------- */
 const ROs=[];const mkRO=f=>{const o=new ResizeObserver(f);ROs.push(o);return o};
+const GC_CODE='fadi';/* GoatCounter code */
+const track=(path,title)=>{try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path,title,event:true})}catch(e){}};
+if(GC_CODE){const s=document.createElement('script');s.async=true;s.src='https://gc.zgo.at/count.js';s.dataset.goatcounter=`https://${GC_CODE}.goatcounter.com/count`;s.dataset.goatcounterSettings='{"no_onload":false}';document.body.appendChild(s)}
 const L=[];
 
 /* ===== Lesson 1 ===== */
@@ -832,13 +835,13 @@ function bindQuiz(i){const q=L[i].quiz,ans=new Array(q.length).fill(-1);let done
  $$('#quiz .q').forEach(el=>{const k=+el.dataset.k;$$('.opts button',el).forEach(b=>b.onclick=()=>{if(done)return;ans[k]=+b.dataset.j;$$('.opts button',el).forEach(x=>x.classList.toggle('pick',x===b))})});
  $('#check').onclick=()=>{if(ans.includes(-1)){toast('في أسئلة لسا ما جاوبتها');return}done=true;let s=0;$$('#quiz .q').forEach(el=>{const k=+el.dataset.k;el.classList.add('shown');$$('.opts button',el).forEach(b=>{const j=+b.dataset.j;b.classList.remove('pick');if(j===q[k].a)b.classList.add('right');else if(j===ans[k])b.classList.add('wrong')});if(ans[k]===q[k].a)s++});
   store.best[i]=Math.max(store.best[i]||0,s);const ok=s>=need(q);$('#score').textContent=`${s} / ${q.length}`;$('#check').style.display='none';$('#retry').style.display='';
-  if(ok){const first=!store.passed[i];store.passed[i]=true;save();rail();$('#qmsg').innerHTML=i<6?`ممتاز، فاهم الدرس. <button class="b main" id="next">الدرس ${i+2}: ${L[i+1].t} ←</button>`:'خلّصت المختبر كله. راجع الأسئلة اللي غلطت فيها قبل الامتحان.';const n=$('#next');if(n)n.onclick=()=>go(i+1);if(first&&i<6)toast(`انفتح الدرس ${i+2}`)}
+  if(ok){const first=!store.passed[i];if(first)track(`pass-lesson-${i+1}`,`نجح بدرس ${i+1}`);store.passed[i]=true;save();rail();$('#qmsg').innerHTML=i<6?`ممتاز، فاهم الدرس. <button class="b main" id="next">الدرس ${i+2}: ${L[i+1].t} ←</button>`:'خلّصت المختبر كله. راجع الأسئلة اللي غلطت فيها قبل الامتحان.';const n=$('#next');if(n)n.onclick=()=>go(i+1);if(first&&i<6)toast(`انفتح الدرس ${i+2}`)}
   else{save();$('#qmsg').textContent=`بدك ${need(q)} على الأقل. اقرأ الشرح تحت كل سؤال غلط، ارجع للأداة، وجرب مرة ثانية.`}};
  $('#retry').onclick=()=>{$('#quiz').outerHTML=quizHTML(i);bindQuiz(i)}}
-function go(i,fromHash){if(!unlocked(i)){toast(`لازم تنجح باختبار الدرس ${i} أول`);return}cur=i;const l=L[i];ROs.forEach(o=>o.disconnect());ROs.length=0;
+function go(i,fromHash){if(!unlocked(i)){toast(`لازم تنجح باختبار الدرس ${i} أول`);return}if(cur!==i||!go.seen){go.seen=true;setTimeout(()=>track(`open-lesson-${i+1}`,`فتح درس ${i+1}`),1500)}cur=i;const l=L[i];ROs.forEach(o=>o.disconnect());ROs.length=0;
  $('#main').innerHTML=`<div class="lead"><div><p class="mute" style="margin:0">الدرس ${i+1} من 7 · <span class="en" style="font-weight:500">${l.h}</span></p><h2>${l.t}</h2><p style="margin:0">${l.intro}</p></div><div class="ctl" style="justify-content:flex-end"><a class="b" href="#quiz" style="text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);color:var(--ink)">روح للاختبار ↓</a></div></div>${l.html()}${quizHTML(i)}`;
  try{l.init($('#main'))}catch(e){console.error(e)}bindQuiz(i);rail();if(!fromHash){try{history.replaceState(null,'','#lesson-'+(i+1))}catch(e){}window.scrollTo({top:0})}}
-$('#openall').onclick=()=>{store.all=!store.all;save();if(!unlocked(cur))cur=0;go(cur,true);toast(store.all?'انفتحت كل الدروس. الاختبارات لسا موجودة إذا بدك تتأكد من حالك.':'رجع القفل: كل درس بينفتح بعد ما تنجح باختبار اللي قبله.')};
+$('#openall').onclick=()=>{store.all=!store.all;if(store.all)track('open-all','فتح كل الدروس');save();if(!unlocked(cur))cur=0;go(cur,true);toast(store.all?'انفتحت كل الدروس. الاختبارات لسا موجودة إذا بدك تتأكد من حالك.':'رجع القفل: كل درس بينفتح بعد ما تنجح باختبار اللي قبله.')};
 $('#reset').onclick=()=>{if($('#reset').dataset.c){store={passed:[false,false,false,false,false,false,false],best:[0,0,0,0,0,0,0],all:false};save();delete $('#reset').dataset.c;$('#reset').textContent='ابدأ من الأول';go(0)}else{$('#reset').dataset.c=1;$('#reset').textContent='متأكد؟ اضغط مرة ثانية';setTimeout(()=>{delete $('#reset').dataset.c;$('#reset').textContent='ابدأ من الأول'},3000)}};
 const fromH=()=>{const m=/^#lesson-(\d)$/.exec(location.hash);if(m){const i=+m[1]-1;if(i>=0&&i<7&&unlocked(i))return i}let j=0;while(j<6&&store.passed[j])j++;return j};
 window.addEventListener('hashchange',()=>{if(!/^#lesson-\d$/.test(location.hash))return;const i=fromH();if(i!==cur)go(i,true)});
