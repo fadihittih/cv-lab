@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مختبر Computer Vision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE everyday study: clear, calm, a lab you poke at
+   IDEA a pixel bench: every lesson is a live specimen you change and watch react
+   PICTURE the working widget of each concept, drawn large, pixels visible
+   COLOUR white / ink, one warm yellow slab for the key number, R G B as working colours
+   TYPE IBM Plex Sans Arabic for everything, IBM Plex Mono for matrices and code
+   LAYOUT top: title + lesson rail; each concept = text beside its widget; quiz closes the lesson; stacks under 820px */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#101418);--ink:light-dark(#101418,#eef1f4);--mute:light-dark(#56616d,#9aa6b2);--panel:light-dark(#f3f4f6,#181e25);--line:light-dark(#dde1e6,#2a323c);--y:#ffd84a;--yink:#2a2100;--r:light-dark(#d62828,#ff6b6b);--g:light-dark(#1f8a3b,#4cd07a);--b:light-dark(#1f5fd6,#6aa2ff);--ok:light-dark(#1f8a3b,#4cd07a);--bad:light-dark(#c62828,#ff7b7b)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16.5px/1.65 "IBM Plex Sans Arabic",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1{font-size:clamp(30px,4.4vw,48px);line-height:1.1;margin:0 0 8px;letter-spacing:-.01em}
+h2{font-size:clamp(26px,3.2vw,38px);line-height:1.15;margin:0 0 6px}
+h3{font-size:21px;line-height:1.3;margin:0 0 8px}
+p{margin:0 0 10px}
+.mute{color:var(--mute)}
+code,.mono,.mat,pre{font-family:"IBM Plex Mono",ui-monospace,monospace;direction:ltr;unicode-bidi:isolate}
+code{font-size:.92em;background:var(--panel);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+pre{background:var(--panel);padding:12px 14px;border-radius:8px;overflow-x:auto;font-size:14px;line-height:1.5;margin:8px 0;text-align:left}
+.calc{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:14.5px;line-height:1.7}
+.en{direction:ltr;unicode-bidi:isolate;font-weight:700}
+blockquote{margin:10px 0;padding:10px 14px;border-inline-start:4px solid var(--y);background:var(--panel);direction:ltr;text-align:left;border-radius:0 8px 8px 0}
+header.top{background:var(--y);color:var(--yink)}
+header.top .row{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:end;justify-content:space-between}
+.meter{display:flex;align-items:center;gap:10px;font-weight:700;white-space:nowrap}
+.meter .bar{width:160px;height:12px;background:#0002;border-radius:6px;overflow:hidden}
+.meter .bar i{display:block;height:100%;background:var(--yink);border-radius:6px;transition:width .4s}
+nav.rail{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.rail .wrap{display:flex;gap:8px;overflow-x:auto;padding:10px max(4vw,16px);scrollbar-width:thin}
+.chip{flex:none;display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 14px;border-radius:22px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+.chip b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--panel);font-size:13px}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.on b{background:var(--y);color:var(--yink)}
+.chip.done b{background:var(--ok);color:#fff}
+.chip.lock{opacity:.5}
+.chip:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--b);outline-offset:2px}
+.lead{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px;align-items:end;margin-bottom:8px}
+.sec{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(18px,3vw,40px);padding:28px 0;border-top:1px solid var(--line);align-items:start}
+.sec.one{grid-template-columns:minmax(0,1fr)}
+.lab{background:var(--panel);border-radius:14px;padding:16px;display:grid;gap:12px}
+.lab .t{font-weight:700;font-size:15px;color:var(--mute)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button.b{min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:15px;cursor:pointer}
+button.b:hover{border-color:var(--ink)}
+button.b.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button.b.main{background:var(--y);color:var(--yink);border-color:var(--y);font-weight:700}
+label.sl{display:grid;grid-template-columns:auto minmax(0,1fr) 4.5em;gap:10px;align-items:center;font-size:15px}
+label.sl output{font-family:"IBM Plex Mono",monospace;font-weight:600;text-align:center;direction:ltr}
+input[type=range]{width:100%;accent-color:var(--ink);height:28px;direction:ltr}
+input[type=number],select{font:inherit;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:6.5em;direction:ltr}
+.big{font-size:clamp(30px,5vw,46px);font-weight:700;line-height:1.1;font-family:"IBM Plex Mono",monospace;direction:ltr;unicode-bidi:isolate}
+.slab{background:var(--y);color:var(--yink);border-radius:10px;padding:10px 14px;display:inline-block}
+canvas.px{width:100%;image-rendering:pixelated;border-radius:8px;display:block;background:#000;aspect-ratio:1}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.cap{font-size:14px;color:var(--mute);text-align:center;margin-top:4px}
+.mat{border-collapse:collapse;margin:4px 0;font-size:14px}
+.mat td{width:2.6em;height:2.2em;text-align:center;border:1px solid var(--line);background:var(--bg);font-variant-numeric:tabular-nums}
+.mat td.hl{background:var(--y);color:var(--yink);font-weight:700}
+.mat td.c{outline:3px solid var(--b);outline-offset:-3px;font-weight:700}
+.mat td.pad{color:var(--mute);background:var(--panel)}
+.mat td.w{background:#ffd84a55}
+.mat td.bg0{background:color-mix(in srgb,var(--b) 22%,var(--bg))}
+.mat td.fg0{background:color-mix(in srgb,var(--r) 22%,var(--bg))}
+.mat input{width:2.4em;border:0;background:transparent;color:inherit;text-align:center;font:inherit;font-size:15px;padding:4px 0}
+.scroll{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:15px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:start;vertical-align:top}
+table.t th{font-size:14px;color:var(--mute);font-weight:500}
+table.t td.n{text-align:center;font-family:"IBM Plex Mono",monospace;white-space:nowrap;direction:ltr}
+tr.best td{background:#ffd84a40;font-weight:700}
+.grid12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:2px;direction:ltr;aspect-ratio:1}
+.grid12 button{border:0;padding:0;border-radius:2px;cursor:pointer;min-height:0}
+.grid12 button.roi{outline:2px solid var(--y);outline-offset:-2px}
+.grid12 button.sel{outline:3px solid var(--ink);outline-offset:-1px}
+.bits{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;direction:ltr}
+.bits button{min-height:58px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:700 22px "IBM Plex Mono",monospace;cursor:pointer;display:grid;place-items:center;line-height:1}
+.bits button small{font-size:12px;font-weight:400;color:var(--mute)}
+.bits button.one{background:var(--y);color:var(--yink);border-color:var(--y)}
+.bits button.one small{color:var(--yink)}
+.hrow{display:grid;grid-template-columns:3em minmax(0,1fr) 5.5em;gap:8px;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:14px;direction:ltr}
+.hrow i{display:block;height:20px;background:var(--ink);border-radius:3px;transition:width .3s}
+.fig{position:relative;min-height:260px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+svg text{font-family:"IBM Plex Mono",monospace;font-size:13px;fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:4px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(13em,1fr));gap:10px}
+.card{background:var(--panel);border-radius:12px;padding:12px 14px}
+.card b{display:block}
+.note{font-size:15px;background:var(--panel);border-radius:10px;padding:10px 14px}
+.quiz{background:var(--ink);color:var(--bg);border-radius:18px;padding:clamp(18px,3vw,32px);margin:28px 0 10px}
+.quiz h2{color:var(--bg)}
+.q{border-top:1px solid #ffffff2a;padding:16px 0}
+.q:first-of-type{border-top:0}
+.q .qt{font-weight:700;margin-bottom:10px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(15em,1fr));gap:8px}
+.opts button{min-height:46px;text-align:start;padding:8px 12px;border-radius:10px;border:1px solid #ffffff40;background:transparent;color:inherit;font:inherit;font-size:15.5px;cursor:pointer}
+.opts button.pick{background:var(--y);color:var(--yink);border-color:var(--y)}
+.opts button.right{background:#2e9d52;color:#fff;border-color:#2e9d52}
+.opts button.wrong{background:#c33;color:#fff;border-color:#c33}
+.q .ex{margin-top:8px;font-size:15px;opacity:.9;display:none}
+.q.shown .ex{display:block}
+.qres{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px}
+.qres .score{font:700 28px "IBM Plex Mono",monospace}
+.toast{position:fixed;inset-inline:16px;bottom:16px;margin:auto;max-width:460px;background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:9;text-align:center}
+.toast.on{opacity:1}
+footer{color:var(--mute);font-size:14px}
+@media(max-width:820px){.sec,.lead{grid-template-columns:minmax(0,1fr)}.meter .bar{width:110px}}
+@media(max-width:480px){.trio{grid-template-columns:repeat(2,minmax(0,1fr))}.bits button{font-size:18px;min-height:52px}label.sl{grid-template-columns:minmax(0,1fr) 4em}label.sl input{grid-column:1/-1;grid-row:2}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top band">
+  <div class="wrap row">
+    <div>
+      <h1>مختبر Computer Vision</h1>
+      <p style="margin:0;max-width:60ch">سبع دروس بترتيب المحاضرات. بكل درس في أدوات بتحركها وبتشوف النتيجة بتتغير قدامك، وبآخره اختبار. <b>ما بينفتح الدرس اللي بعده إلا إذا جبت 80% أو أكثر.</b></p>
+    </div>
+    <div class="ctl" style="gap:14px"><div class="meter"><span id="mtxt">0 من 7</span><span class="bar"><i id="mbar" style="width:0"></i></span></div><button class="b" id="openall" style="background:#0000;border-color:var(--yink);color:var(--yink)">افتح كل الدروس</button></div>
+  </div>
+</header>
+<nav class="rail" aria-label="الدروس"><div class="wrap" id="rail"></div></nav>
+<main class="band"><div class="wrap" id="main"></div></main>
+<footer class="band"><div class="wrap" style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center">
+  <span>مبني على سلايدات Dr. Osama Al Sayaydeh، المحاضرات 1 لحد 7. الصور بالأدوات مرسومة بالكود كأمثلة.</span>
+  <button class="b" id="reset">ابدأ من الأول</button>
+</div></footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+{
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const fmt=n=>Number(n).toLocaleString('en-US');
+const r2=n=>Math.round(n*100)/100;
+let seed=11;const rnd=()=>(seed=seed*16807%2147483647)/2147483647;
+let store={passed:[false,false,false,false,false,false,false],best:[0,0,0,0,0,0,0]};
+try{const s=JSON.parse(localStorage.getItem('cv-lab-v1'));if(s&&Array.isArray(s.passed))store=s}catch(e){}
+const save=()=>{try{localStorage.setItem('cv-lab-v1',JSON.stringify(store))}catch(e){}};
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2600)};
+
+/* ---------- pixel helpers ---------- */
+function paint(cv,w,h,f){cv.width=w;cv.height=h;const c=cv.getContext('2d'),d=c.createImageData(w,h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const p=f(x,y),i=(y*w+x)*4;if(typeof p==='number'){d.data[i]=d.data[i+1]=d.data[i+2]=p}else{d.data[i]=p[0];d.data[i+1]=p[1];d.data[i+2]=p[2]}d.data[i+3]=255}c.putImageData(d,0,0);return c}
+function sunset(N){seed=5;const a=new Float32Array(N*N);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const hz=N*.56;let v;if(y<hz){v=95+(y/hz)*95;const d=Math.hypot(x-N*.62,y-hz*.82);v+=Math.max(0,75-d*4.2)}else{v=60+38*Math.sin(x*.8+y*1.9)*Math.sin(y*.45);if(Math.abs(x-N*.62)<N*.07)v+=95}const px=N*.34;if(Math.abs(x-px)<N*.05&&y>N*.42&&y<N*.97)v=18;if(Math.hypot(x-px,y-N*.37)<N*.05)v=18;a[y*N+x]=clamp(v+(rnd()-.5)*14,0,255)}return a}
+function blur(a,N){const o=new Float32Array(N*N);for(let y=0;y<N;y++)for(let x=0;x<N;x++){let s=0,c=0;for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const yy=y+j,xx=x+i;if(yy>=0&&yy<N&&xx>=0&&xx<N){s+=a[yy*N+xx];c++}}o[y*N+x]=s/c}return o}
+const at=(a,N,x,y)=>a[clamp(y,0,N-1)*N+clamp(x,0,N-1)];
+const mat=(m,cls)=>`<table class="mat">${m.map((row,y)=>`<tr>${row.map((v,x)=>`<td class="${cls?cls(x,y,v):''}">${v}</td>`).join('')}</tr>`).join('')}</table>`;
+const range=(id,label,min,max,val,step=1)=>`<label class="sl"><span>${label}</span><input type="range" id="${id}" min="${min}" max="${max}" step="${step}" value="${val}"><output id="${id}o">${val}</output></label>`;
+const bindR=(root,id,fn)=>{const e=$('#'+id,root),o=$('#'+id+'o',root);const h=()=>{o.textContent=e.value;fn(+e.value)};e.addEventListener('input',h);h();return e};
+
+/* ---------- lessons ---------- */
+const ROs=[];const mkRO=f=>{const o=new ResizeObserver(f);ROs.push(o);return o};
+const L=[];
+
+/* ===== Lesson 1 ===== */
+L.push({t:'مقدمة',h:'Introduction',intro:'شو هو الـ Computer Vision، ليش صعب، وكيف بيمشي الـ pipeline.',
+html:()=>`
+<div class="sec"><div>
+<h3>التعريف</h3>
+<blockquote>Computer Vision (CV) is a field of Artificial Intelligence (AI) that enables machines to interpret and understand visual information from the world.</blockquote>
+<p>الكاميرا بتعطيك أرقام بس. الـ CV هو اللي بحوّل هالأرقام لمعنى. والجملة المهمة: <span class="en">CV works backward from images to infer properties of the world</span>، يعني من الصورة بنرجع نستنتج شو كان بالعالم.</p>
+<p>بيشتغل زي عينك: <span class="en">Input → Sensing device → Interpreting device → Output</span>، والإنسان: مشهد ← عين ← دماغ ← تعرّف.</p>
+</div><div class="cards">
+<div class="card"><b class="en">Object Detection & Recognition</b>تحديد الأجسام وتسميتها. <span class="mute en" style="font-weight:400">Classification → + Localization → Object Detection</span></div>
+<div class="card"><b class="en">3D Reconstruction</b>نموذج ثلاثي الأبعاد من صور 2D من زوايا مختلفة.</div>
+<div class="card"><b class="en">Motion Analysis</b>تتبع حركة الأجسام عبر الفيديو.</div>
+<div class="card"><b class="en">Biomedical Imaging</b>تحليل X-rays و MRI و CT.</div>
+<div class="card"><b class="en">Face Recognition</b>كشف الوجوه وتحليلها وتمييزها.</div>
+</div></div>
+
+<div class="sec"><div>
+<h3>ليش الـ CV صعب؟ جرّب بنفسك</h3>
+<p>اضغط على كل تحدي وشوف كيف <b>نفس الطابة</b> بتطلع بأرقام مختلفة كليًا. الكمبيوتر ما بشوف "طابة"، بشوف المصفوفة اللي تحت.</p>
+<table class="t"><tr><td class="en">Viewpoint</td><td>الكاميرا تحركت، مصفوفة البكسلات تغيرت كليًا</td></tr><tr><td class="en">Deformation</td><td>الأجسام غير الصلبة بتتشوه</td></tr><tr><td class="en">Occlusion</td><td>جزء من الجسم مخفي ورا جسم ثاني</td></tr><tr><td class="en">Illumination</td><td>الإضاءة بتغيّر البكسلات بشكل جذري</td></tr><tr><td class="en">Motion</td><td>الحركة بتغبّش الجسم</td></tr></table>
+<p class="note">الإنسان بيتعرف بسهولة لأنه عنده خبرة يومية بالأشكال والألوان، والكمبيوتر بيحتاج <span class="en">suitable algorithms + representative training data + robust models</span>.</p>
+</div><div class="lab">
+<div class="ctl" id="chal"></div>
+<canvas id="chc" style="width:100%;aspect-ratio:3/2;border-radius:8px;display:block"></canvas>
+<div class="t">قيم الرمادي (متوسط كل مربع) اللي الكمبيوتر فعليًا بشوفها:</div>
+<div class="scroll" id="chm"></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>The Computer Vision Pipeline</h3>
+<p>خمس خطوات بالترتيب. اضغط على كل خطوة وشوف الصورة شو بيصير فيها.</p>
+<div id="pdesc" class="note"></div>
+<p class="mute">🧠 حفظ: Acquisition, Preprocessing, Segmentation, Feature extraction, Classification.</p>
+</div><div class="lab">
+<div class="ctl" id="pbtn"></div>
+<div style="position:relative"><canvas class="px" id="pcv"></canvas><div id="plab" class="slab" style="position:absolute;top:10px;inset-inline-start:10px;display:none"></div></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>أنواع الصور والـ Resolution</h3>
+<p><b class="en">Binary</b>: 0 أو 1 بس. <b class="en">Grayscale</b>: من 0 (أسود) لـ 255 (أبيض). <b class="en">Color</b>: 3 قنوات RGB.</p>
+<p><b>Resolution</b>: عدد البكسلات. أكثر ← تفاصيل أوضح. أقل ← <span class="en">pixelation</span>. حرّك السلايدر.</p>
+</div><div class="lab">
+<div class="trio"><div><canvas class="px" id="ty0"></canvas><div class="cap">Binary</div></div><div><canvas class="px" id="ty1"></canvas><div class="cap">Grayscale</div></div><div><canvas class="px" id="ty2"></canvas><div class="cap">Color</div></div></div>
+${range('res','Resolution',4,96,24)}
+</div></div>`,
+init(R){
+ const ch=['عادي','Viewpoint','Deformation','Occlusion','Illumination','Motion'];
+ const cv=$('#chc',R);let cur=0;
+ const draw=()=>{const W=360,H=240;cv.width=W;cv.height=H;const c=cv.getContext('2d');c.fillStyle='#3d8a4a';c.fillRect(0,0,W,H);
+  const ball=(x,y,sx,sy,alpha)=>{c.save();c.globalAlpha=alpha;c.translate(x,y);c.scale(sx,sy);c.fillStyle='#f4f4f4';c.beginPath();c.arc(0,0,58,0,7);c.fill();c.fillStyle='#d1284a';for(let k=0;k<5;k++){c.beginPath();c.arc(Math.cos(k*1.26)*34,Math.sin(k*1.26)*34,16,0,7);c.fill()}c.beginPath();c.arc(0,0,14,0,7);c.fill();c.restore()};
+  if(cur===1){ball(180,120,.55,1,1)}else if(cur===2){ball(180,150,1.5,.55,1)}else if(cur===5){for(let k=0;k<6;k++)ball(120+k*24,120,1,1,.28)}else ball(180,120,1,1,1);
+  if(cur===3){c.fillStyle='#6b4a2b';c.fillRect(185,30,140,190)}
+  if(cur===4){const g=c.createLinearGradient(0,0,W,0);g.addColorStop(0,'rgba(0,0,0,.82)');g.addColorStop(1,'rgba(0,0,0,.15)');c.fillStyle=g;c.fillRect(0,0,W,H)}
+  const d=c.getImageData(0,0,W,H).data,m=[];for(let by=0;by<4;by++){const row=[];for(let bx=0;bx<6;bx++){let s=0,n=0;for(let y=by*60;y<by*60+60;y+=4)for(let x=bx*60;x<bx*60+60;x+=4){const i=(y*W+x)*4;s+=.299*d[i]+.587*d[i+1]+.114*d[i+2];n++}row.push(Math.round(s/n))}m.push(row)}
+  $('#chm',R).innerHTML=mat(m);};
+ $('#chal',R).innerHTML=ch.map((n,i)=>`<button class="b ${i?'':'on'}" data-i="${i}">${n}</button>`).join('');
+ $$('#chal button',R).forEach(b=>b.onclick=()=>{cur=+b.dataset.i;$$('#chal button',R).forEach(x=>x.classList.toggle('on',x===b));draw()});draw();
+ // pipeline
+ const N=48;seed=3;const base=new Float32Array(N*N);for(let y=0;y<N;y++)for(let x=0;x<N;x++){let v=70+20*Math.sin(x*.5)*Math.cos(y*.4);if(Math.hypot(x-30,y-22)<11)v=215;base[y*N+x]=v}
+ const noisy=base.map(v=>clamp(v+(rnd()-.5)*110,0,255)),sm=blur(blur(noisy,N),N);const mean=sm.reduce((a,b)=>a+b)/sm.length;const bin=sm.map(v=>v>(mean+215)/2.4?255:0);
+ const edge=bin.map((v,i)=>{const x=i%N,y=(i/N)|0;return(v!==at(bin,N,x+1,y)||v!==at(bin,N,x,y+1))?255:0});
+ const sn=['Acquisition','Preprocessing','Segmentation','Features','Classification'];const steps=[['Image Acquisition','الكاميرا التقطت الصورة: فيها noise (نقاط عشوائية).',noisy],['Preprocessing','نظفنا الصورة: noise removal و normalization و resizing.',sm],['Segmentation','قسمنا الصورة لمناطق: الجسم (أبيض) والخلفية (أسود). هون بيجي الـ Thresholding من Lecture 5.',bin],['Feature Extraction','استخرجنا الخصائص: edges, corners, textures, colors. هون بيجي الـ Edge Detection من Lecture 7.',edge],['Classification / Detection','خوارزمية ML أو DL بتتعرف على الجسم وبتحط حواليه مربع.',bin]];
+ $('#pbtn',R).innerHTML=steps.map((s,i)=>`<button class="b ${i?'':'on'}" data-i="${i}">${i+1}. ${sn[i]}</button>`).join('');
+ const show=i=>{const s=steps[i];const c=paint($('#pcv',R),N,N,(x,y)=>s[2][y*N+x]);if(i===4){c.strokeStyle='#ffd84a';c.lineWidth=1;c.strokeRect(17.5,9.5,26,26)}$('#plab',R).style.display=i===4?'block':'none';$('#plab',R).textContent='Object: ball';$('#pdesc',R).innerHTML=`<b class="en">${i+1}. ${s[0]}</b><br>${s[1]}`};
+ $$('#pbtn button',R).forEach(b=>b.onclick=()=>{$$('#pbtn button',R).forEach(x=>x.classList.toggle('on',x===b));show(+b.dataset.i)});show(0);
+ // types + resolution
+ const col=(x,y)=>{const d=Math.hypot(x-.6,y-.45);if(d<.2)return[230,90,40];if(y>.7)return[60,140,70];return[110,170,230]};
+ bindR(R,'res',n=>{paint($('#ty2',R),n,n,(x,y)=>col(x/n,y/n));paint($('#ty1',R),n,n,(x,y)=>{const p=col(x/n,y/n);return .299*p[0]+.587*p[1]+.114*p[2]});paint($('#ty0',R),n,n,(x,y)=>{const p=col(x/n,y/n);return(.299*p[0]+.587*p[1]+.114*p[2])>130?255:0})});
+},
+quiz:[
+{q:'Computer Vision هو فرع من:',o:['Artificial Intelligence','Computer Networks','Databases','Operating Systems'],a:0,e:'CV is a field of AI that enables machines to interpret and understand visual information.'},
+{q:'جزء من الجسم اختفى ورا جسم ثاني. هذا التحدي اسمه:',o:['Deformation','Occlusion','Illumination','Viewpoint Variation'],a:1,e:'Occlusion: the disappearance of parts of an object behind other objects.'},
+{q:'الترتيب الصحيح للـ CV Pipeline:',o:['Acquisition → Segmentation → Preprocessing → Features → Classification','Preprocessing → Acquisition → Features → Segmentation → Classification','Acquisition → Preprocessing → Segmentation → Feature Extraction → Classification','Acquisition → Features → Preprocessing → Classification → Segmentation'],a:2,e:'التقاط ← تنظيف ← تقسيم ← خصائص ← تصنيف.'},
+{q:'Noise removal و normalization و resizing بتصير بخطوة:',o:['Segmentation','Preprocessing','Feature Extraction','Image Acquisition'],a:1,e:'Preprocessing = enhancing image quality.'},
+{q:'صورة فيها قطة وكلب وبطة، والنظام حط مربع واسم لكل واحد. هذا:',o:['Classification','Classification + Localization','Object Detection','Segmentation'],a:2,e:'Object Detection = labels + boxes لأكثر من جسم. الـ Localization لجسم واحد.'},
+{q:'تكوين نموذج ثلاثي الأبعاد من عدة صور 2D من زوايا مختلفة:',o:['Motion Analysis','3D Reconstruction','Biomedical Imaging','Face Recognition'],a:1,e:'3D Reconstruction بيخلي الجهاز يفهم العمق والشكل الحقيقي.'},
+{q:'قيم الـ Grayscale pixel بتكون بين:',o:['0 و 1','0 و 31','0 و 255','0 و 1023'],a:2,e:'0 = black، 255 = white.'}
+]});
+
+/* ===== Lesson 2 ===== */
+L.push({t:'أساسيات الصورة',h:'Digital Image Fundamentals',intro:'من الـ 0 والـ 1 لحد حجم الصورة بالبايت.',
+html:()=>`
+<div class="sec"><div>
+<h3>Binary System</h3>
+<p>كل bit إله وزن = قوة للـ 2. اضغط على الـ bits وشوف الرقم العشري. أو اكتب رقم عشري وشوفه binary.</p>
+<p class="mono" style="font-size:14px">N = bₙ·2ⁿ + … + b₁·2¹ + b₀·2⁰</p>
+<p class="note">⭐ <b>at the lowest level, all images are represented in 0s and 1s</b>، بس عمليًا منشتغل حسب نوع تمثيل الصورة.</p>
+</div><div class="lab">
+<div class="bits" id="bits"></div>
+<div class="ctl" style="justify-content:space-between"><span class="big" id="bdec">93</span><label class="ctl">Decimal <input type="number" id="bin" min="0" max="255" value="93"></label></div>
+<div class="mono mute" id="bsum" style="font-size:14px"></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Bit Depth: كم لون بيقدر الـ pixel يعرض؟</h3>
+<p><b>L = 2<sup>q</sup></b> قيمة، من 0 لـ 2<sup>q</sup> − 1. حرّك عدد الـ bits وشوف الشريط والصورة كيف بتصير "درجات".</p>
+<div class="scroll"><table class="t"><tr><th>Bit depth</th><th>Colors</th><th>ملاحظة</th></tr>
+<tr><td class="n">1-bit</td><td class="n">2</td><td>أسود أو أبيض</td></tr>
+<tr><td class="n">8-bit</td><td class="n">256</td><td>grayscale من 0 لـ 255</td></tr>
+<tr><td class="n">16-bit</td><td class="n">65,536</td><td><span class="en">RGB565</span>: 5 أحمر، 6 أخضر، 5 أزرق</td></tr>
+<tr><td class="n">24-bit</td><td class="n">16,777,216</td><td>8 لكل قناة = 3 bytes للـ pixel</td></tr></table></div>
+</div><div class="lab">
+${range('bd','Bits (q)',1,8,3)}
+<div class="ctl" style="justify-content:space-between"><span class="slab big" id="bdL"></span><span class="mono" id="bdR"></span></div>
+<canvas id="bdg" style="width:100%;height:46px;image-rendering:pixelated;border-radius:6px;display:block"></canvas>
+<canvas class="px" id="bdi" style="aspect-ratio:2/1"></canvas>
+</div></div>
+
+<div class="sec"><div>
+<h3>Additive Colour Model (RGB)</h3>
+<p>بنخلط <b>ضوء</b> أحمر وأخضر وأزرق. كل قناة 0 لـ 255. اللون = <span class="en">RGB triplet</span>.</p>
+<p>⭐ Black (0,0,0) · White (255,255,255) · Red (255,0,0) · Mid-grey (128,128,128)</p>
+</div><div class="lab">
+${range('cr','R',0,255,255)}${range('cg','G',0,255,125)}${range('cb','B',0,255,0)}
+<div style="display:flex;gap:12px;align-items:center"><div id="csw" style="width:96px;height:96px;border-radius:12px;flex:none"></div><span class="big" id="ctr"></span></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>حجم الصورة بدون ضغط ⭐</h3>
+<p class="mono">bytes = W × H × bits per pixel / 8</p>
+<p>أو <span class="mono">W × H × bytes per pixel</span>. الأشهر: 24-bit RGB = 3 bytes للـ pixel. للفيديو اضرب بعدد الـ frames بالثانية.</p>
+<p class="note">⚠️ <b>Image dimensions</b> = عرض × ارتفاع بالبكسل. <b>Image resolution</b> بالمحاضرة 2 = PPI / DPI (بكسل لكل إنش).</p>
+<p class="mute">جرب أمثلة السلايدات بالأزرار.</p>
+</div><div class="lab">
+<div class="ctl"><label>W <input type="number" id="mw" value="1920"></label><label>H <input type="number" id="mh" value="1080"></label>
+<label>Depth <select id="md"><option value="1">1-bit</option><option value="8">8-bit gray</option><option value="16">16-bit</option><option value="24" selected>24-bit RGB</option></select></label><label>fps <input type="number" id="mf" value="0" min="0"></label></div>
+<div class="ctl" id="mpre"></div>
+<div class="slab big" id="mout"></div>
+<div class="mono" id="mwork" style="font-size:14.5px"></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>1-bit و 2-bit</h3>
+<p>بـ 2 bits عندك 4 قيم: <span class="mono">00 black · 01 dark grey · 10 light grey · 11 white</span>.</p>
+<p>⭐ <b>Bits only have the meaning we assign to them.</b> نفس الـ bits ممكن نفسرها ألوان: <span class="mono">00 red · 01 orange · 10 yellow · 11 white</span>. بدّل التفسير.</p>
+</div><div class="lab">
+<div class="ctl"><button class="b on" id="tb0">Grey</button><button class="b" id="tb1">Colours</button></div>
+<div class="duo"><canvas class="px" id="tbc"></canvas><div class="scroll mono" id="tbm" style="font-size:14px;line-height:1.9"></div></div>
+</div></div>`,
+init(R){
+ const w=[128,64,32,16,8,4,2,1];let v=93;
+ const up=()=>{$$('#bits button',R).forEach((b,i)=>b.classList.toggle('one',!!(v&w[i])));$$('#bits button span',R).forEach((s,i)=>s.textContent=(v&w[i])?1:0);$('#bdec',R).textContent=v;$('#bin',R).value=v;const t=w.filter(x=>v&x);$('#bsum',R).textContent=`(${w.map(x=>v&x?1:0).join('')})₂ = ${t.length?t.join(' + '):'0'} = ${v}`};
+ $('#bits',R).innerHTML=w.map(x=>`<button><span>0</span><small>${x}</small></button>`).join('');
+ $$('#bits button',R).forEach((b,i)=>b.onclick=()=>{v^=w[i];up()});$('#bin',R).oninput=e=>{v=clamp(+e.target.value|0,0,255);up()};up();
+ const img=sunset(64);
+ bindR(R,'bd',q=>{const L=2**q;$('#bdL',R).textContent=`L = 2^${q} = ${L}`;$('#bdR',R).textContent=`0 … ${L-1}`;const qz=v=>Math.round(Math.round(v/255*(L-1))*255/(L-1));paint($('#bdg',R),256,1,x=>qz(x));paint($('#bdi',R),128,64,(x,y)=>qz(img[y*64+(x>>1)]))});
+ const cc=()=>{const r=+$('#cr',R).value,g=+$('#cg',R).value,b=+$('#cb',R).value;$('#csw',R).style.background=`rgb(${r},${g},${b})`;$('#ctr',R).textContent=`(${r}, ${g}, ${b})`};['cr','cg','cb'].forEach(id=>bindR(R,id,cc));
+ const pre=[['Full HD',1920,1080,24,0],['4000×3000',4000,3000,24,0],['2560×1440',2560,1440,24,0],['640×480 gray',640,480,8,0],['Video 30fps',1920,1080,24,30]];
+ $('#mpre',R).innerHTML=pre.map((p,i)=>`<button class="b" data-i="${i}">${p[0]}</button>`).join('');
+ const calc=()=>{const W=+$('#mw',R).value||0,H=+$('#mh',R).value||0,q=+$('#md',R).value,f=+$('#mf',R).value||0;const by=W*H*q/8;const mib=by/1048576;let s=`${fmt(W)} × ${fmt(H)} × ${q} / 8 = ${fmt(by)} bytes\n≈ ${r2(by/1e6)} MB ≈ ${r2(mib)} MiB\npixels = ${fmt(W*H)}`;let big=`${fmt(by)} B`;if(f>0){s+=`\n× ${f} fps = ${fmt(by*f)} B/s ≈ ${r2(by*f*8/1e9)} Gb/s`;big=`${fmt(by*f)} B/s`}$('#mout',R).textContent=big;$('#mwork',R).innerHTML=s.replace(/\n/g,'<br>')};
+ ['mw','mh','md','mf'].forEach(id=>$('#'+id,R).oninput=calc);$$('#mpre button',R).forEach(b=>b.onclick=()=>{const p=pre[+b.dataset.i];$('#mw',R).value=p[1];$('#mh',R).value=p[2];$('#md',R).value=p[3];$('#mf',R).value=p[4];calc()});calc();
+ const M=[[3,3,0,0,3,3],[3,0,1,1,0,3],[0,1,2,2,1,0],[0,1,2,2,1,0],[3,0,1,1,0,3],[3,3,0,0,3,3]];
+ const pal=[[[0,0,0],[90,90,90],[190,190,190],[255,255,255]],[[200,20,20],[245,140,20],[250,225,40],[255,255,255]]];let pi=0;
+ const tb=()=>{paint($('#tbc',R),6,6,(x,y)=>pal[pi][M[y][x]]);$('#tbm',R).innerHTML=M.map(r=>r.map(v=>v.toString(2).padStart(2,'0')).join(' ')).join('<br>')};
+ ['tb0','tb1'].forEach((id,i)=>$('#'+id,R).onclick=()=>{pi=i;$('#tb0',R).classList.toggle('on',!i);$('#tb1',R).classList.toggle('on',!!i);tb()});tb();
+},
+quiz:[
+{q:'(10111101)₂ بالعشري =',o:['187','189','205','173'],a:1,e:'128+32+16+8+4+1 = 189.'},
+{q:'صورة grayscale بـ 10-bit فيها كم code؟',o:['256 من 0 لـ 255','512 من 0 لـ 511','1024 من 0 لـ 1023','1000 من 0 لـ 999'],a:2,e:'2¹⁰ = 1024 codes، من 0 لـ 1023.'},
+{q:'الحجم الخام لصورة 640×480 بـ 8-bit grayscale:',o:['921,600 B','307,200 B','2,457,600 B','38,400 B'],a:1,e:'640 × 480 × 1 byte = 307,200 B = 300 KiB.'},
+{q:'كم لون بتعرض صورة 24-bit RGB؟',o:['65,536','16,777,216','256','4,294,967,296'],a:1,e:'256³ = 2²⁴ = 16,777,216.'},
+{q:'حسب Lecture 2، الـ Image resolution هي:',o:['عدد البكسلات بالعرض فقط','عدد البكسلات لكل إنش (PPI / DPI)','عدد الـ bits لكل pixel','عدد القنوات'],a:1,e:'Dimensions = W×H، Resolution = PPI/DPI.'},
+{q:'Pixel بـ 2 bits بيقدر ياخذ كم لون؟',o:['2','3','4','8'],a:2,e:'2² = 4 (00, 01, 10, 11).'},
+{q:'Full HD RGB frame (1920×1080، 8 bits لكل قناة) حجمه الخام:',o:['2,073,600 B','6,220,800 B','49,766,400 B','4,147,200 B'],a:1,e:'1920 × 1080 × 3 = 6,220,800 B. والـ 49,766,400 هي bits مش bytes.'}
+]});
+
+/* ===== Lesson 3 ===== */
+L.push({t:'16-bit و Vector وضغط',h:'Digital Image Fundamentals (2)',intro:'كيف بنضغط الألوان، ليش الـ vector ما بيتكسر، ومعادلاته، وأنواع الضغط.',
+html:()=>`
+<div class="sec"><div>
+<h3>16-bit: ليش الأحمر 5 bits بس؟</h3>
+<p>بالـ 16-bit (<span class="en">RGB565</span>) الأحمر 5 bits = 32 قيمة (0 لـ 31) بدل 256. فلازم نحوّل:</p>
+<p class="big" style="font-size:24px">R₅ = R₈ × 31 / 255</p>
+<p>31 = 2⁵ − 1، و 255 = 2⁸ − 1. أمثلة السلايد: 255 ← 31، 128 ← 16، 64 ← 8.</p>
+<p class="mute">32 × 64 × 32 = 65,536 لون بالـ 16-bit، مقابل 16,777,216 بالـ 24-bit.</p>
+</div><div class="lab">
+${range('r8','R (8-bit)',0,255,128)}
+<div class="slab big" id="r5o"></div>
+<div class="mono" id="r5w" style="font-size:14.5px"></div>
+<div class="duo"><div><div id="sw8" style="height:70px;border-radius:8px"></div><div class="cap">الأصلي 8-bit</div></div><div><div id="sw5" style="height:70px;border-radius:8px"></div><div class="cap">بعد 5-bit (لاحظ إنه قريب جدًا)</div></div></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Raster vs Vector: كبّر وشوف</h3>
+<p><b class="en">Vector image</b>: مرسومة بمعادلات رياضية مش pixels. بتخزّن تعليمات زي "ارسم دائرة". لما تكبّر، الكمبيوتر بيعيد الحساب فبتضل حادة.</p>
+<div class="scroll"><table class="t"><tr><th></th><th>Raster</th><th>Vector</th></tr>
+<tr><td>مكونة من</td><td>شبكة pixels</td><td>معادلات</td></tr><tr><td>التكبير</td><td>pixelation</td><td>بتضل حادة</td></tr><tr><td>Resolution</td><td>dependent</td><td>independent</td></tr><tr><td>الحجم</td><td>كبير بالدقة العالية</td><td>أصغر</td></tr></table></div>
+<p>⭐ خصائص الـ vector الأربع: <b>Mathematical representation · Scalability · Efficient storage · Easy editing</b>.</p>
+</div><div class="lab">
+${range('zm','Zoom',1,10,1,.5)}
+<div class="duo"><div><canvas id="zr" class="px" style="background:#fff"></canvas><div class="cap">Raster</div></div><div><svg id="zv" viewBox="0 0 24 24" style="width:100%;aspect-ratio:1;background:#fff;border-radius:8px;display:block"><circle cx="12" cy="12" r="8" fill="#1f5fd6"/><path d="M6 15 L18 9" stroke="#fff" stroke-width="1.4"/></svg><div class="cap">Vector</div></div></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>معادلة الدائرة: داخل، على، أو برا؟</h3>
+<p class="mono">(x − h)² + (y − k)² = r²</p>
+<p>المركز (3, 4) و r = 5، يعني r² = 25. <b>اضغط على أي نقطة بالشبكة.</b></p>
+<div class="scroll"><table class="t"><tr><th>الناتج</th><th>المعنى</th></tr><tr><td class="n">&lt; 25</td><td>Inside</td></tr><tr><td class="n">= 25</td><td>On the circle</td></tr><tr><td class="n">&gt; 25</td><td>Outside</td></tr></table></div>
+<p class="mute">والخط: y = mx + c، و m = (y₂−y₁)/(x₂−x₁). مثال السلايد A(2,1) و B(8,4): m = 0.5، c = 0، y = 0.5x.</p>
+</div><div class="lab">
+<div class="ctl" id="cpre"></div>
+<div class="fig" style="min-height:300px"><svg id="csv"></svg></div>
+<div class="mono" id="cout" style="font-size:15px"></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Quadratic Curve (Bézier)</h3>
+<p class="mono" style="font-size:14px">B(t) = (1−t)² P₀ + 2(1−t)t P₁ + t² P₂ ، 0 ≤ t ≤ 1</p>
+<p>P₀ = (0,0) بداية، <b>P₁ = (2,4) control point</b> بيحدد الشكل، P₂ = (4,0) نهاية. حرّك t وشوف النقطة بتمشي.</p>
+<p class="note">لاحظ: المنحنى ما بيمر من P₁. عند t = 0.5 بيوصل (2, 2) مش (2, 4).</p>
+</div><div class="lab">
+${range('bt','t',0,1,.5,.05)}
+<div class="fig" style="min-height:280px"><svg id="bsv"></svg></div>
+<div class="mono" id="bout" style="font-size:14.5px"></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Compression ⭐</h3>
+<p>الهدف: نصغّر الملف عشان <b>التخزين والنقل</b>. الحجم الخام: <span class="mono">S_raw = W·H·C·b / 8</span> (بدون headers و metadata).</p>
+<div class="scroll"><table class="t"><tr><th></th><th>Lossless</th><th>Lossy</th></tr>
+<tr><td>البيانات</td><td>ما في أي فقدان، بترجع الأصلية تمامًا</td><td>بيانات بتنحذف للأبد، الفرق غالبًا ما بينلاحظ</td></tr>
+<tr><td>النسبة</td><td>أقل</td><td>أعلى</td></tr>
+<tr><td>أمثلة</td><td class="en">PNG, GIF, TIFF</td><td class="en">JPEG, WebP</td></tr></table></div>
+<p class="mono" style="font-size:14px">CR = S_raw / S_compressed ، bpp = 8·S_compressed / (W·H)</p>
+<p class="mute">CR أكبر = ملف أصغر. bpp أقل = bits أقل لكل pixel. ولا واحد منهم بيضمن الجودة لحاله.</p>
+</div><div class="lab">
+<div class="t">مثال القطة بالسلايد:</div>
+<div id="cmp" style="display:grid;gap:10px"></div>
+</div></div>`,
+init(R){
+ bindR(R,'r8',v=>{const x=v*31/255,r=Math.round(x);$('#r5o',R).textContent=`R₅ = ${r}`;$('#r5w',R).textContent=`${v} × 31 / 255 = ${r2(x)} ≈ ${r}`;$('#sw8',R).style.background=`rgb(${v},0,0)`;$('#sw5',R).style.background=`rgb(${Math.round(r*255/31)},0,0)`});
+ const lo=document.createElement('canvas');lo.width=lo.height=24;const lc=lo.getContext('2d');lc.fillStyle='#fff';lc.fillRect(0,0,24,24);lc.fillStyle='#1f5fd6';lc.beginPath();lc.arc(12,12,8,0,7);lc.fill();lc.strokeStyle='#fff';lc.lineWidth=1.4;lc.beginPath();lc.moveTo(6,15);lc.lineTo(18,9);lc.stroke();
+ const zr=$('#zr',R);zr.width=zr.height=240;
+ bindR(R,'zm',z=>{const s=24/z,o=12-s/2+ (z>1?3*(1-1/z):0);const c=zr.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#fff';c.fillRect(0,0,240,240);c.drawImage(lo,o,o,s,s,0,0,240,240);$('#zv',R).setAttribute('viewBox',`${o} ${o} ${s} ${s}`)});
+ // circle
+ const sv=$('#csv',R);let P=[4,5];
+ const pts=[[4,5],[6,8],[9,9],[3,3]];$('#cpre',R).innerHTML=pts.map(p=>`<button class="b" data-p="${p}">(${p})</button>`).join('');
+ const dc=()=>{const W=sv.clientWidth,H=sv.clientHeight,x0=-3,x1=9,y0=-2,y1=10,S=Math.min(W,H)/12.4,ox=(W-12*S)/2,oy=(H-12*S)/2;const X=x=>ox+(x-x0)*S,Y=y=>oy+(y1-y)*S;let g='';for(let i=x0;i<=x1;i++)g+=`<line x1="${X(i)}" x2="${X(i)}" y1="${Y(y0)}" y2="${Y(y1)}" stroke="var(--line)"/>`;for(let j=y0;j<=y1;j++)g+=`<line y1="${Y(j)}" y2="${Y(j)}" x1="${X(x0)}" x2="${X(x1)}" stroke="var(--line)"/>`;
+  g+=`<line x1="${X(0)}" x2="${X(0)}" y1="${Y(y0)}" y2="${Y(y1)}" stroke="var(--mute)"/><line y1="${Y(0)}" y2="${Y(0)}" x1="${X(x0)}" x2="${X(x1)}" stroke="var(--mute)"/>`;
+  g+=`<circle cx="${X(3)}" cy="${Y(4)}" r="${5*S}" fill="#1f5fd622" stroke="var(--b)" stroke-width="2.5"/><circle cx="${X(3)}" cy="${Y(4)}" r="4" fill="var(--b)"/>`;
+  const D=(P[0]-3)**2+(P[1]-4)**2,col=D<25?'var(--ok)':D===25?'#e0a800':'var(--bad)';g+=`<circle cx="${X(P[0])}" cy="${Y(P[1])}" r="8" fill="${col}" stroke="var(--panel)" stroke-width="2"/><text x="${X(P[0])+12}" y="${Y(P[1])-10}">(${P})</text>`;
+  sv.innerHTML=g;sv.onclick=e=>{const b=sv.getBoundingClientRect();P=[clamp(Math.round((e.clientX-b.left-ox)/S+x0),x0,x1),clamp(Math.round(y1-(e.clientY-b.top-oy)/S),y0,y1)];dc()};
+  $('#cout',R).innerHTML=`(${P[0]} − 3)² + (${P[1]} − 4)² = ${(P[0]-3)**2} + ${(P[1]-4)**2} = <b>${D}</b> → <b>${D<25?'Inside':D===25?'On the circle':'Outside'}</b>`};
+ $$('#cpre button',R).forEach(b=>b.onclick=()=>{P=b.dataset.p.split(',').map(Number);dc()});const ro1=mkRO(dc);ro1.observe(sv);
+ // bezier
+ const bs=$('#bsv',R);let T=.5;const P0=[0,0],P1=[2,4],P2=[4,0],lp=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t];
+ const db=()=>{const W=bs.clientWidth,H=bs.clientHeight,S=Math.min((W-40)/4,(H-40)/4),ox=(W-4*S)/2,oy=(H-4*S)/2;const X=p=>ox+p[0]*S,Y=p=>H-oy-p[1]*S;let path='';for(let i=0;i<=40;i++){const t=i/40,q=lp(lp(P0,P1,t),lp(P1,P2,t),t);path+=(i?'L':'M')+X(q)+' '+Y(q)}
+  const q0=lp(P0,P1,T),q1=lp(P1,P2,T),B=lp(q0,q1,T);let tr='';for(let i=0;i<=40*T;i++){const t=i/40,q=lp(lp(P0,P1,t),lp(P1,P2,t),t);tr+=(i?'L':'M')+X(q)+' '+Y(q)}
+  bs.innerHTML=`<path d="M${X(P0)} ${Y(P0)} L${X(P1)} ${Y(P1)} L${X(P2)} ${Y(P2)}" fill="none" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 5"/><path d="${path}" fill="none" stroke="var(--mute)" stroke-width="2"/><path d="${tr}" fill="none" stroke="var(--b)" stroke-width="4"/><line x1="${X(q0)}" y1="${Y(q0)}" x2="${X(q1)}" y2="${Y(q1)}" stroke="#e0a800" stroke-width="2"/>${[[P0,'P₀'],[P1,'P₁'],[P2,'P₂']].map(([p,n])=>`<circle cx="${X(p)}" cy="${Y(p)}" r="6" fill="var(--ink)"/><text x="${X(p)+(p===P2?-36:10)}" y="${Y(p)+(p===P1?-6:-10)}">${n}</text>`).join('')}<circle cx="${X(B)}" cy="${Y(B)}" r="9" fill="var(--r)"/><text x="${X(B)+12}" y="${Y(B)+20}">(${r2(B[0])}, ${r2(B[1])})</text>`;
+  const a=(1-T)**2,b=2*(1-T)*T,c=T*T;$('#bout',R).innerHTML=`B(${T}) = ${r2(a)}·P₀ + ${r2(b)}·P₁ + ${r2(c)}·P₂<br>= ${r2(a)}·(0,0) + ${r2(b)}·(2,4) + ${r2(c)}·(4,0) = <b>(${r2(B[0])}, ${r2(B[1])})</b>`};
+ const ro2=mkRO(db);ro2.observe(bs);bindR(R,'bt',v=>{T=v;db()});
+ $('#cmp',R).innerHTML=[['Original',976,'var(--ink)'],['Lossless',834,'var(--g)'],['Lossy',212,'var(--r)']].map(([n,k,c])=>`<div class="hrow" style="grid-template-columns:6em minmax(0,1fr) 5em"><span>${n}</span><span><i style="width:${k/976*100}%;background:${c}"></i></span><span>${k} KB</span></div>`).join('')+`<p class="note mono" style="direction:ltr;text-align:left">Lossy CR ≈ 976 / 212 ≈ 4.6 (حسبة إضافية مني)</p>`;
+},
+quiz:[
+{q:'حوّل R = 128 (8-bit) لـ 5-bit:',o:['15','16','31','8'],a:1,e:'128 × 31 / 255 = 15.56 ≈ 16.'},
+{q:'التوزيع المعتاد للـ 16-bit color:',o:['8R 4G 4B','5R 6G 5B','6R 5G 5B','4R 8G 4B'],a:1,e:'RGB565: 5 أحمر، 6 أخضر، 5 أزرق.'},
+{q:'أي وحدة <b>مش</b> من خصائص الـ vector image؟',o:['Scalability','Easy editing','Resolution-dependent','Efficient storage'],a:2,e:'الـ vector هو resolution-independent. الـ raster هو اللي dependent.'},
+{q:'النقطة (6, 8) والدائرة مركزها (3, 4) و r = 5:',o:['Inside','On the circle','Outside','ما بنقدر نعرف'],a:1,e:'9 + 16 = 25 = r² ← على الدائرة.'},
+{q:'B(0.5) للنقاط P₀(0,0) و P₁(2,4) و P₂(4,0):',o:['(2, 4)','(2, 2)','(1, 2)','(2, 1)'],a:1,e:'0.25·(0,0) + 0.5·(2,4) + 0.25·(4,0) = (2, 2).'},
+{q:'أمثلة على الـ Lossless compression:',o:['JPEG, WebP','PNG, GIF, TIFF','JPEG, PNG','WebP, TIFF'],a:1,e:'Lossless: PNG, GIF, TIFF. Lossy: JPEG, WebP.'},
+{q:'Compression Ratio أكبر معناه:',o:['ملف أكبر','ملف أصغر','جودة أعلى أكيد','bpp أعلى'],a:1,e:'CR = S_raw / S_compressed، فكل ما كبر الملف المضغوط صغر.'}
+]});
+
+/* ===== Lesson 4 ===== */
+L.push({t:'عمليات أساسية',h:'Basic Operations on Images',intro:'NumPy و OpenCV: نقرأ pixel، نغيره، نقص ROI، نفصل القنوات، ونحط إطار.',
+html:()=>`
+<div class="sec"><div>
+<h3>NumPy vs OpenCV ⭐</h3>
+<div class="scroll"><table class="t"><tr><th></th><th>Strength</th><th>Limitation</th></tr>
+<tr><td class="en">NumPy</td><td>ممتازة للـ pixel-level operations والحسابات</td><td>ما بتقرأ ولا بتكتب ولا بتعرض صور مباشرة</td></tr>
+<tr><td class="en">OpenCV</td><td>الأحسن للمعالجة المعقدة ومهام الـ CV (C++ مع Python bindings)</td><td>أقل راحة بالعمليات الحسابية البسيطة</td></tr></table></div>
+<p class="note">⭐ <b>OpenCV images are stored as NumPy arrays.</b> ومعظم العمليات الأساسية أحسن بـ NumPy.</p>
+<h3 style="margin-top:16px">اقرأ pixel وغيّره</h3>
+<p>اضغط على أي pixel بالصورة. OpenCV بيخزن <b>BGR</b>، فالـ index هو: <span class="en">Blue = 0, Green = 1, Red = 2</span>.</p>
+<pre id="pxcode"></pre>
+<div class="ctl"><button class="b" id="pxred">img[y, x] = [0, 0, 255]</button><button class="b" id="pxrst">Reset</button></div>
+</div><div class="lab">
+<div class="ctl" id="chv"></div>
+<div class="grid12" id="g12"></div>
+<pre id="props"></pre>
+</div></div>
+
+<div class="sec"><div>
+<h3>Region of Interest (ROI) ⭐</h3>
+<p>بدل ما ندوّر بكل الصورة، بنحدد منطقة. مثال: بندوّر على الوجه أول، وبعدين على العيون <b>جوّا</b> الوجه. بيوفر وقت وبيحسن الدقة والأداء.</p>
+<p>الصيغة <code>img[y1:y2, x1:x2]</code>: <b>الصفوف أول</b> (الارتفاع)، بعدين الأعمدة. والنهاية مش محسوبة.</p>
+<p><code>.copy()</code> بتعمل نسخة مستقلة. <code>part.shape[0]</code> = ارتفاع، <code>part.shape[1]</code> = عرض.</p>
+</div><div class="lab">
+${range('ry1','y1',0,11,6)}${range('ry2','y2',1,12,10)}${range('rx1','x1',0,11,7)}${range('rx2','x2',1,12,11)}
+<pre id="roic"></pre>
+<div class="ctl"><button class="b main" id="paste">الصق بالزاوية الفوق يسار</button></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>إطار للصورة: copyMakeBorder</h3>
+<pre>cv2.copyMakeBorder(src, top, bottom, left, right,
+                   borderType, value)</pre>
+<div class="scroll"><table class="t"><tr><th>Parameter</th><th>المعنى</th></tr><tr><td class="en">src</td><td>الصورة</td></tr><tr><td class="en">top, bottom, left, right</td><td>سماكة الإطار بالبكسل</td></tr><tr><td class="en">borderType</td><td>نوع الإطار</td></tr><tr><td class="en">value</td><td>اللون، <b>بس مع BORDER_CONSTANT</b></td></tr></table></div>
+<p class="note">ليش <code>BLUE = [255, 0, 0]</code>؟ لأنه BGR. وقبل <code>plt.imshow</code> لازم <code>cv2.COLOR_BGR2RGB</code> لأن Matplotlib بتتوقع RGB.</p>
+</div><div class="lab">
+${range('bw','Thickness',0,20,8)}
+<div class="ctl" id="bcol"></div>
+<label class="ctl"><input type="checkbox" id="bfix" checked style="width:22px;height:22px"> حوّل BGR2RGB قبل العرض</label>
+<canvas class="px" id="bcv" style="max-width:320px"></canvas>
+<pre id="bcode"></pre>
+</div></div>`,
+init(R){
+ const base=()=>{const a=[];for(let y=0;y<12;y++){const r=[];for(let x=0;x<12;x++){let p=[50,140,45];if(Math.abs((11-y)*1.2-x*.55-3)<.7)p=[235,240,240];const d=Math.hypot(x-9,y-8);if(d<1.9)p=(x+y)%3?[245,245,245]:[70,40,215];r.push(p)}a.push(r)}return a};
+ let img=base(),sel=[8,9],view='c';
+ const g=$('#g12',R);
+ const col=p=>view==='c'?`rgb(${p[2]},${p[1]},${p[0]})`:view==='z'?`rgb(0,${p[1]},${p[0]})`:(()=>{const v=p[{b:0,g:1,r:2}[view]];return`rgb(${v},${v},${v})`})();
+ const roi=()=>[+$('#ry1',R).value,+$('#ry2',R).value,+$('#rx1',R).value,+$('#rx2',R).value];
+ const drawG=()=>{const[y1,y2,x1,x2]=roi();g.innerHTML=img.map((row,y)=>row.map((p,x)=>`<button aria-label="pixel ${y},${x}" data-y="${y}" data-x="${x}" class="${y>=y1&&y<y2&&x>=x1&&x<x2?'roi':''} ${y===sel[0]&&x===sel[1]?'sel':''}" style="background:${col(p)}"></button>`).join('')).join('');
+  const p=img[sel[0]][sel[1]];$('#pxcode',R).textContent=`px = img[${sel[0]}, ${sel[1]}]\nprint(px)          # [${p.join(' ')}]  ← B, G, R\nred = img[${sel[0]}, ${sel[1]}, 2]\nprint(red)         # ${p[2]}\nimg.item(${sel[0]}, ${sel[1]}, 2)  # ${p[2]}`;
+  const h=Math.max(0,y2-y1),w=Math.max(0,x2-x1);$('#roic',R).textContent=`part = img[${y1}:${y2}, ${x1}:${x2}].copy()\npart.shape  # (${h}, ${w}, 3)\nimg[0:0+${h}, 0:0+${w}] = part`};
+ g.onclick=e=>{const b=e.target.closest('button');if(!b)return;sel=[+b.dataset.y,+b.dataset.x];drawG()};
+ $('#pxred',R).onclick=()=>{img[sel[0]][sel[1]]=[0,0,255];drawG()};$('#pxrst',R).onclick=()=>{img=base();drawG()};
+ const views=[['c','Color'],['b','b (0)'],['g','g (1)'],['r','r (2)'],['z','img[:,:,2] = 0']];
+ $('#chv',R).innerHTML=views.map(([k,n])=>`<button class="b ${k==='c'?'on':''}" data-k="${k}">${n}</button>`).join('');
+ $$('#chv button',R).forEach(b=>b.onclick=()=>{view=b.dataset.k;$$('#chv button',R).forEach(x=>x.classList.toggle('on',x===b));drawG()});
+ $('#props',R).textContent=`b, g, r = cv2.split(img)\nimg.shape  # (12, 12, 3)\nimg.size   # 432  = 12×12×3\nimg.dtype  # uint8  (0 → 255)`;
+ ['ry1','ry2','rx1','rx2'].forEach(id=>bindR(R,id,drawG));
+ $('#paste',R).onclick=()=>{const[y1,y2,x1,x2]=roi();if(y2<=y1||x2<=x1){toast('لازم y2 > y1 و x2 > x1');return}const part=img.slice(y1,y2).map(r=>r.slice(x1,x2).map(p=>[...p]));part.forEach((r,y)=>r.forEach((p,x)=>img[y][x]=p));drawG();toast('انلصقت. اضغط Reset بالقسم اللي فوق لترجع الصورة.')};
+ drawG();
+ const cols=[['BLUE',[255,0,0]],['GREEN',[0,255,0]],['RED',[0,0,255]]];let bc=0;
+ $('#bcol',R).innerHTML=cols.map((c,i)=>`<button class="b ${i?'':'on'}" data-i="${i}">${c[0]} = [${c[1]}]</button>`).join('');
+ const bd=()=>{const t=+$('#bw',R).value,fix=$('#bfix',R).checked,v=cols[bc][1],N=64,M=N+2*t;const sh=q=>fix?[q[2],q[1],q[0]]:q;
+  paint($('#bcv',R),M,M,(x,y)=>{if(x<t||y<t||x>=M-t||y>=M-t)return sh(v);const X=x-t,Y=y-t;if(Math.hypot(X-32,Y-30)<16||Math.hypot(X-32,Y-56)<20)return sh([60,150,235]);return sh([70,150,60])});
+  $('#bcode',R).textContent=`${cols[bc][0]} = [${v.join(', ')}]   # BGR\nconstant = cv2.copyMakeBorder(img, ${t}, ${t}, ${t}, ${t},\n            cv2.BORDER_CONSTANT, value=${cols[bc][0]})\n${fix?'plt.imshow(cv2.cvtColor(constant, cv2.COLOR_BGR2RGB))':'plt.imshow(constant)   # ⚠️ الألوان رح تطلع غلط'}`};
+ $$('#bcol button',R).forEach(b=>b.onclick=()=>{bc=+b.dataset.i;$$('#bcol button',R).forEach(x=>x.classList.toggle('on',x===b));bd()});$('#bfix',R).onchange=bd;bindR(R,'bw',bd);
+},
+quiz:[
+{q:'بـ OpenCV، <code>img[y, x, 2]</code> بيرجع قيمة:',o:['Blue','Green','Red','Alpha'],a:2,e:'BGR: Blue = 0، Green = 1، Red = 2.'},
+{q:'صورة shape تبعها (2112, 3168, 3). شو بيطلع <code>img.size</code>؟',o:['6,690,816','20,072,448','2112','9,504'],a:1,e:'2112 × 3168 × 3 = 20,072,448. الـ size بتعد القنوات كمان.'},
+{q:'<code>img[60:130, 280:550]</code> معناه:',o:['أعمدة 60 لـ 129 وصفوف 280 لـ 549','صفوف 60 لـ 129 وأعمدة 280 لـ 549','صفوف 60 لـ 130 وأعمدة 280 لـ 550 شاملة','بكسل واحد'],a:1,e:'[y1:y2, x1:x2]: الصفوف أول، والنهاية مش محسوبة.'},
+{q:'مدى قيم <code>uint8</code>:',o:['0 → 1.0','0 → 255','−128 → 127','0 → 65,535'],a:1,e:'Unsigned Integer 8-bit: 0 لـ 255.'},
+{q:'ليش منعمل <code>cv2.COLOR_BGR2RGB</code> قبل <code>plt.imshow</code>؟',o:['عشان نصغّر الصورة','لأن Matplotlib بتتوقع RGB و OpenCV بتخزن BGR','عشان نحولها grayscale','عشان نسرّع الكود'],a:1,e:'بدونها الأحمر والأزرق بيتبدلوا.'},
+{q:'أي وحدة من حدود NumPy؟',o:['بطيئة بالحسابات','ما بتقرأ ولا بتكتب ولا بتعرض صور مباشرة','ما بتدعم المصفوفات','ما بتشتغل مع Matplotlib'],a:1,e:'Lacks direct support for reading, writing, or displaying images.'},
+{q:'بـ <code>copyMakeBorder</code>، الـ parameter اللي بينستخدم بس مع <code>BORDER_CONSTANT</code>:',o:['top','borderType','value','src'],a:2,e:'value = لون الإطار الثابت.'}
+]});
+
+/* ===== Lesson 5 ===== */
+L.push({t:'دمج و Global Thresholding',h:'Algebraic Operations + Thresholding',intro:'نخلط صورتين، وبعدين نحول الرمادي لأبيض وأسود.',
+html:()=>`
+<div class="sec"><div>
+<h3>دمج صورتين: addWeighted ⭐</h3>
+<p class="big" style="font-size:22px">Result = α·Img1 + β·Img2 + γ</p>
+<p><b>α</b> وزن (شفافية) الصورة الأولى، <b>β</b> وزن الثانية، <b>γ</b> رقم بنضيفه للسطوع (غالبًا 0). لازم الصورتين <b>نفس الحجم</b> (لهيك <code>cv2.resize(img, (750, 600))</code>) عشان البكسلات تتطابق.</p>
+<p>بيستعمل لـ: watermarks و logos شفافة، overlays، و transitions.</p>
+<pre>res = cv2.addWeighted(img1, 0.7, img2, 0.3, 0)</pre>
+</div><div class="lab">
+<div class="trio"><div><canvas class="px" id="a1"></canvas><div class="cap">img1 (القطة)</div></div><div><canvas class="px" id="a2"></canvas><div class="cap">img2 (الطابة)</div></div><div><canvas class="px" id="a3"></canvas><div class="cap">Result</div></div></div>
+${range('al','α',0,1,.7,.05)}${range('be','β',0,1,.3,.05)}${range('ga','γ',-60,60,0,5)}
+<label class="ctl"><input type="checkbox" id="lk" checked style="width:22px;height:22px"> β = 1 − α</label>
+<div class="calc" id="aw" style="font-size:14.5px"></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Thresholding</h3>
+<p><b>Object</b>: منطقة مميزة بنهتم فيها (شخص، قمر). <b>Segmentation</b>: تقسيم الصورة لمناطق متشابهة عشان نفصل الجسم عن الخلفية، وهي أول خطوة بكثير مهام.</p>
+<p><b>Thresholding</b> = أبسط segmentation: بيحول <b class="en">grayscale → binary</b>. كل pixel بينقارن بـ T.</p>
+<div class="scroll"><table class="t" id="ttab"><tr><th>Type</th><th>إذا &gt; T</th><th>غير هيك</th></tr></table></div>
+<p class="mute">🧠 TRUNC = قصّ الراس. TOZERO = الغامق بيصير صفر. TOZERO_INV = الفاتح بيصير صفر.</p>
+</div><div class="lab">
+<div class="ctl" id="tty"></div>
+<div class="duo"><div><canvas class="px" id="t0"></canvas><div class="cap">Original</div></div><div><canvas class="px" id="t1"></canvas><div class="cap" id="tcap"></div></div></div>
+${range('th','T',0,255,127)}
+<div class="fig" style="min-height:130px"><svg id="hsv"></svg></div>
+<div class="calc" id="tex" style="font-size:14px"></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Mean و Median Thresholding ⭐</h3>
+<p>الاثنين <b>global</b>: T واحد لكل الصورة.</p>
+<p class="mono">T_mean = (1/N) Σ I(x,y) ، T_median = median of all I</p>
+<p>⭐ الـ <b>median أقوى ضد الـ noise والـ outliers</b>، خصوصًا مع إضاءة غير متجانسة.</p>
+<p class="note">بأمثلة السلايدات: pixel <b>≥ T</b> ← 1 (white)، و &lt; T ← 0. عدّل الأرقام وجرب سؤال السلايد.</p>
+<div class="ctl"><button class="b" id="mm1">Example 1</button><button class="b" id="mm2">Question</button></div>
+</div><div class="lab">
+<div class="duo"><div><div class="t">I (عدّل)</div><table class="mat" id="mmi"></table></div><div id="mmo"></div></div>
+<div class="mono" id="mmw" style="font-size:14px"></div>
+</div></div>`,
+init(R){
+ const N=56;const im1=(x,y)=>{const d=Math.hypot(x-28,y-31);const ear=(y<22&&y>8&&(Math.abs(x-17)<(y-8)*.55||Math.abs(x-39)<(y-8)*.55));if(d<17||ear){if(Math.hypot(x-21,y-28)<3||Math.hypot(x-35,y-28)<3)return[60,140,70];return[225,140,60]}return[70,165,80]};
+ const im2=(x,y)=>{if(Math.hypot(x-40,y-34)<8)return(x+y)%5<2?[200,30,70]:[245,245,245];if(Math.abs(y-(46-x*.45))<1.2)return[235,240,235];return[40,125,45]};
+ paint($('#a1',R),N,N,im1);paint($('#a2',R),N,N,im2);
+ const bl=()=>{const a=+$('#al',R).value,b=+$('#be',R).value,g=+$('#ga',R).value;paint($('#a3',R),N,N,(x,y)=>{const p=im1(x,y),q=im2(x,y);return p.map((v,i)=>clamp(Math.round(a*v+b*q[i]+g),0,255))});const p=im1(28,31)[0],q=im2(28,31)[0];$('#aw',R).innerHTML=`مثال pixel (قناة R بالنص):<br>${a} × ${p} + ${r2(b)} × ${q} + ${g} = <b>${clamp(Math.round(a*p+b*q+g),0,255)}</b>`};
+ bindR(R,'al',v=>{if($('#lk',R).checked){$('#be',R).value=r2(1-v);$('#beo',R).textContent=r2(1-v)}bl()});bindR(R,'be',()=>{$('#lk',R).checked=false;bl()});bindR(R,'ga',bl);
+ const S=96,img=sunset(S);paint($('#t0',R),S,S,(x,y)=>img[y*S+x]);
+ const types=[['BINARY',(v,T)=>v>T?255:0,'255','0'],['BINARY_INV',(v,T)=>v>T?0:255,'0','255'],['TRUNC',(v,T)=>v>T?T:v,'T','نفسه'],['TOZERO',(v,T)=>v>T?v:0,'نفسه','0'],['TOZERO_INV',(v,T)=>v>T?0:v,'0','نفسه']];
+ $('#ttab',R).innerHTML+=types.map(t=>`<tr><td class="en">${t[0]}</td><td>${t[2]}</td><td>${t[3]}</td></tr>`).join('');
+ let ti=0;$('#tty',R).innerHTML=types.map((t,i)=>`<button class="b ${i?'':'on'}" data-i="${i}">${t[0]}</button>`).join('');
+ const hist=new Array(256).fill(0);img.forEach(v=>hist[v|0]++);const hm=Math.max(...hist);
+ const thr=()=>{const T=+$('#th',R).value,f=types[ti][1];paint($('#t1',R),S,S,(x,y)=>f(img[y*S+x],T));$('#tcap',R).textContent=`cv2.THRESH_${types[ti][0]}`;
+  const sv=$('#hsv',R),W=sv.clientWidth,H=sv.clientHeight;if(W){const bw=W/256;sv.innerHTML=hist.map((c,i)=>`<rect x="${i*bw}" y="${H-18-c/hm*(H-24)}" width="${bw+.3}" height="${c/hm*(H-24)}" fill="${i>T?'var(--ink)':'var(--mute)'}"/>`).join('')+`<line x1="${T*bw}" x2="${T*bw}" y1="0" y2="${H-18}" stroke="var(--r)" stroke-width="2" stroke-dasharray="4 3"/><text x="${clamp(T*bw+6,0,W-60)}" y="14">T=${T}</text><text x="0" y="${H-2}">0</text><text x="${W-28}" y="${H-2}">255</text>`}
+  $('#tex',R).innerHTML=`ret, out = cv2.threshold(img, ${T}, 255, cv2.THRESH_${types[ti][0]})<br>pixel 200 → ${f(200,T)} ، pixel 50 → ${f(50,T)}`};
+ $$('#tty button',R).forEach(b=>b.onclick=()=>{ti=+b.dataset.i;$$('#tty button',R).forEach(x=>x.classList.toggle('on',x===b));thr()});bindR(R,'th',thr);const ro3=mkRO(thr);ro3.observe($('#hsv',R));
+ let M=[[50,80,90],[70,120,140],[200,220,240]];
+ const mm=()=>{const f=M.flat(),s=f.reduce((a,b)=>a+b,0),mean=s/9,so=[...f].sort((a,b)=>a-b),med=so[4];
+  const bin=T=>M.map(r=>r.map(v=>v>=T?1:0));
+  $('#mmo',R).innerHTML=`<div class="t">Mean (T = ${r2(mean)})</div>${mat(bin(mean),(x,y,v)=>v?'hl':'')}<div class="t">Median (T = ${med})</div>${mat(bin(med),(x,y,v)=>v?'hl':'')}`;
+  $('#mmw',R).innerHTML=`T_mean = ${f.join('+')} / 9 = ${s} / 9 = <b>${r2(mean)}</b><br>sorted: {${so.map((v,i)=>i===4?`<b>${v}</b>`:v).join(', ')}} → median = <b>${med}</b>`};
+ const mi=()=>{$('#mmi',R).innerHTML=M.map((r,y)=>`<tr>${r.map((v,x)=>`<td><input type="number" min="0" max="255" value="${v}" data-y="${y}" data-x="${x}" aria-label="I ${y} ${x}"></td>`).join('')}</tr>`).join('');$$('#mmi input',R).forEach(e=>e.oninput=()=>{M[+e.dataset.y][+e.dataset.x]=clamp(+e.value||0,0,255);mm()});mm()};
+ $('#mm1',R).onclick=()=>{M=[[50,80,90],[70,120,140],[200,220,240]];mi()};$('#mm2',R).onclick=()=>{M=[[40,60,90],[110,130,150],[170,200,230]];mi()};mi();
+},
+quiz:[
+{q:'<code>addWeighted(img1, 0.7, img2, 0.3, 0)</code>، pixel بالأولى 200 وبالثانية 100. الناتج:',o:['150','170','300','130'],a:1,e:'0.7×200 + 0.3×100 + 0 = 140 + 30 = 170.'},
+{q:'T = 127، pixel = 200، بـ <code>THRESH_TRUNC</code>:',o:['255','0','127','200'],a:2,e:'TRUNC: اللي فوق T بيصير T.'},
+{q:'أي نوع بيخلي المناطق الفاتحة زي ما هي والغامقة بتصير 0؟',o:['TOZERO','TOZERO_INV','BINARY_INV','TRUNC'],a:0,e:'TOZERO: > T بيضل، غير هيك 0.'},
+{q:'Mean threshold للصورة [[50,80,90],[70,120,140],[200,220,240]]:',o:['120','134.44','130','145'],a:1,e:'1210 / 9 = 134.44.'},
+{q:'ليش الـ median ممكن يكون أحسن من الـ mean؟',o:['أسرع بالحساب','أقوى ضد الـ noise والـ outliers','دايمًا بيعطي T أعلى','بيشتغل بس مع الصور الملونة'],a:1,e:'Median is more robust to noise and outliers.'},
+{q:'بدك الأجسام الغامقة تطلع بيضاء:',o:['BINARY','BINARY_INV','TOZERO','TRUNC'],a:1,e:'BINARY_INV: > T ← 0، غير هيك ← 255.'},
+{q:'الـ Thresholding بيحول:',o:['من Color لـ Grayscale','من Grayscale لـ Binary','من Binary لـ Color','من Raster لـ Vector'],a:1,e:'Grayscale image into a binary image.'}
+]});
+
+/* ===== Lesson 6 ===== */
+L.push({t:'Adaptive Thresholding',h:'Adaptive Thresholding (Mean and Gaussian)',intro:'لما الإضاءة مش متساوية: T لكل pixel من جيرانه.',
+html:()=>`
+<div class="sec"><div>
+<h3>ليش الـ global بيفشل؟</h3>
+<p>ورقة Sudoku: اليسار غامق واليمين فاتح. <b>T واحد</b> ما بيزبط للجهتين: يا الغامق بيصير أسود كله، يا الفاتح بيختفي.</p>
+<p><b>Adaptive Thresholding</b>: بنحسب T لكل <b>منطقة صغيرة (window)</b> حوالين كل pixel، فبيطلع إلنا thresholds كثير بنفس الصورة.</p>
+<p>جرب: حرك T تبع الـ global وشوف إنك ما بتلاقي قيمة بتزبط كل الورقة. بعدين حرك blockSize و C.</p>
+<pre>cv2.adaptiveThreshold(img, 255,
+    cv2.ADAPTIVE_THRESH_MEAN_C,
+    cv2.THRESH_BINARY, 9, 3)
+#   blockSize = 9 , C = 3</pre>
+</div><div class="lab">
+<div class="trio"><div><canvas class="px" id="s0"></canvas><div class="cap">Original</div></div><div><canvas class="px" id="s1"></canvas><div class="cap">Global</div></div><div><canvas class="px" id="s2"></canvas><div class="cap">Adaptive Mean</div></div></div>
+${range('gt','Global T',0,255,110)}${range('ab','blockSize',3,31,15,2)}${range('ac','C',0,20,6)}
+</div></div>
+
+<div class="sec"><div>
+<h3>خطوة بخطوة على مثال السلايد ⭐</h3>
+<p class="en" style="font-weight:500">1 Grayscale → 2 Padding → 3 Select window → 4 Local mean → 5 T = mean − C → 6 Compare (≥ T → 255)</p>
+<p><b>Replication padding</b>: نكرر أول صف فوق، آخر صف تحت، أول عمود يسار، آخر عمود يمين. 5×5 ← 7×7. (في كمان <b>zero padding</b> = إطار أصفار.)</p>
+<p><b>اضغط على أي pixel بالصورة الأصلية</b> وشوف الـ window تبعه بالـ padded والحساب كامل. وبدّل بين Mean و Gaussian.</p>
+<div class="ctl"><button class="b on" id="mmean">Mean</button><button class="b" id="mgau">Gaussian</button><label class="ctl">C <input type="number" id="cc" value="2" min="0" max="20"></label><button class="b main" id="all">احسب كل البكسلات</button></div>
+</div><div class="lab">
+<div class="duo"><div><div class="t">Original 5×5</div><div class="scroll" id="o5"></div></div><div><div class="t">Padded 7×7</div><div class="scroll" id="p7"></div></div></div>
+<div class="calc" id="aw6" style="font-size:14px"></div>
+<div><div class="t">Binary result</div><div class="scroll" id="r5"></div></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>شو هو C وكيف بنختاره؟ ⭐</h3>
+<p><b>C</b> رقم ثابت صغير بنطرحه من الـ mean: <span class="mono">T = mean − C</span>. بيخلي T أقل شوي من متوسط الجيران، فالتفاصيل الغامقة (نص، حواف) بتنكشف صح.</p>
+<div class="cards"><div class="card"><b>بالتجربة</b>عادة رقم صغير بين 2 و 10</div><div class="card"><b>صورة فاتحة جدًا</b>C أكبر</div><div class="card"><b>صورة غامقة</b>C أصغر أو حتى 0</div></div>
+<p class="note">⚠️ المصفوفة النهائية بسلايد 20 مختلفة عن اللي بتطلع بالحساب (الصف الأخير بس فيه 0). امشِ على الخطوات بالامتحان.</p>
+</div><div>
+<h3>Gaussian Adaptive</h3>
+<p>بدل المتوسط العادي، <b>متوسط موزون</b>: الـ pixels القريبة من المركز إلها وزن أكبر.</p>
+<p class="mono" style="font-size:14px">G(x,y) = 1/(2πσ²) · e^(−(x²+y²)/2σ²)</p>
+<div class="scroll">${mat([[0.0625,0.125,0.0625],[0.125,0.25,0.125],[0.0625,0.125,0.0625]],(x,y)=>x===1&&y===1?'hl':'')}</div>
+<p>النتيجة: أحسن مع <b>uneven lighting</b>، صورة أنعم وأطبيعية، و noise أقل حول الحواف.</p>
+<div class="scroll"><table class="t"><tr><th></th><th>Mean</th><th>Gaussian</th></tr><tr><td>T من</td><td>متوسط عادي</td><td>متوسط موزون</td></tr><tr><td>الأوزان</td><td>كلها 1/9</td><td>المركز 0.25، الزوايا 0.0625</td></tr><tr><td>OpenCV</td><td class="en">ADAPTIVE_THRESH_MEAN_C</td><td class="en">ADAPTIVE_THRESH_GAUSSIAN_C</td></tr></table></div>
+</div></div>`,
+init(R){
+ const N=120;const c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,N,N);x.fillStyle='#000';for(let i=0;i<=6;i++){const w=i%3===0?2.5:1;x.fillRect(4+i*18.5-w/2,4,w,111);x.fillRect(4,4+i*18.5-w/2,111,w)}x.font='bold 13px sans-serif';x.textAlign='center';x.textBaseline='middle';const dg=[[0,1,'7'],[1,0,'6'],[2,2,'4'],[3,1,'2'],[4,4,'9'],[5,3,'5'],[1,4,'3'],[3,5,'8'],[0,5,'1'],[5,0,'2'],[2,3,'5'],[4,2,'7']];dg.forEach(([r,cc,t])=>x.fillText(t,4+cc*18.5+9.25,4+r*18.5+10));
+ const d=x.getImageData(0,0,N,N).data,img=new Float32Array(N*N);for(let i=0;i<N*N;i++){const X=i%N,Y=(i/N)|0;const L=.18+.82*Math.min(1,(X/N)*1.25+(Y/N)*.1);img[i]=d[i*4]*L*.92+10*L}
+ paint($('#s0',R),N,N,(X,Y)=>img[Y*N+X]);
+ const I=new Float64Array((N+1)*(N+1));for(let y=0;y<N;y++)for(let X=0;X<N;X++)I[(y+1)*(N+1)+X+1]=img[y*N+X]+I[y*(N+1)+X+1]+I[(y+1)*(N+1)+X]-I[y*(N+1)+X];
+ const ad=()=>{const b=+$('#ab',R).value,C=+$('#ac',R).value,h=b>>1;paint($('#s2',R),N,N,(X,Y)=>{const x0=clamp(X-h,0,N-1),x1=clamp(X+h,0,N-1)+1,y0=clamp(Y-h,0,N-1),y1=clamp(Y+h,0,N-1)+1;const s=I[y1*(N+1)+x1]-I[y0*(N+1)+x1]-I[y1*(N+1)+x0]+I[y0*(N+1)+x0];const m=s/((x1-x0)*(y1-y0));return img[Y*N+X]>m-C?255:0})};
+ bindR(R,'gt',T=>paint($('#s1',R),N,N,(X,Y)=>img[Y*N+X]>T?255:0));bindR(R,'ab',ad);bindR(R,'ac',ad);
+ const O=[[50,55,60,70,75],[45,50,55,65,70],[40,45,50,60,65],[35,40,45,55,60],[30,35,40,50,55]];
+ const P=Array.from({length:7},(_,y)=>Array.from({length:7},(_,x)=>O[clamp(y-1,0,4)][clamp(x-1,0,4)]));
+ const G=[[.0625,.125,.0625],[.125,.25,.125],[.0625,.125,.0625]];let gm=false,cur=[0,0],res=O.map(r=>r.map(()=>'–'));
+ const comp=(y,x)=>{const W=[0,1,2].map(j=>[0,1,2].map(i=>P[y+j][x+i]));const C=+$('#cc',R).value||0;let m,work;if(gm){m=W.flat().reduce((a,v,k)=>a+v*G.flat()[k],0);work=W.flat().map((v,k)=>`${G.flat()[k]}×${v}`).join(' + ')}else{m=W.flat().reduce((a,b)=>a+b,0)/9;work=`(${W.flat().join('+')}) / 9`}const T=m-C;return{W,m,T,C,work,out:O[y][x]>=T?255:0}};
+ const show=()=>{const[y,x]=cur,r=comp(y,x);res[y][x]=r.out;
+  $('#o5',R).innerHTML=`<table class="mat">${O.map((row,yy)=>`<tr>${row.map((v,xx)=>`<td class="${yy===y&&xx===x?'c':''}" style="cursor:pointer" data-y="${yy}" data-x="${xx}">${v}</td>`).join('')}</tr>`).join('')}</table>`;
+  $('#p7',R).innerHTML=mat(P,(xx,yy)=>{const inW=yy>=y&&yy<y+3&&xx>=x&&xx<x+3;if(inW&&yy===y+1&&xx===x+1)return'c w';if(inW)return'w';return(yy===0||yy===6||xx===0||xx===6)?'pad':''});
+  $('#aw6',R).innerHTML=`pixel (${y},${x}) = <b>${O[y][x]}</b> · ${gm?'Gaussian':'Mean'}<br>${gm?'T_G':'T_mean'} = ${r.work} = <b>${r2(r.m)}</b><br>T = ${r2(r.m)} − ${r.C} = <b>${r2(r.T)}</b><br>${O[y][x]} ${O[y][x]>=r.T?'≥':'<'} ${r2(r.T)} → <b>${r.out}</b>`;
+  $('#r5',R).innerHTML=mat(res,(xx,yy,v)=>(v===255?'hl':'')+(yy===y&&xx===x?' c':''));
+  $$('#o5 td',R).forEach(td=>td.onclick=()=>{cur=[+td.dataset.y,+td.dataset.x];show()})};
+ const reset=()=>{res=O.map(r=>r.map(()=>'–'));show()};
+ $('#mmean',R).onclick=()=>{gm=false;$('#mmean',R).classList.add('on');$('#mgau',R).classList.remove('on');reset()};$('#mgau',R).onclick=()=>{gm=true;$('#mgau',R).classList.add('on');$('#mmean',R).classList.remove('on');reset()};$('#cc',R).oninput=reset;
+ $('#all',R).onclick=()=>{for(let y=0;y<5;y++)for(let x=0;x<5;x++)res[y][x]=comp(y,x).out;show()};show();
+},
+quiz:[
+{q:'إمتى بنحتاج Adaptive بدل Global thresholding؟',o:['لما الصورة ملونة','لما الإضاءة مش متجانسة بالصورة','لما الصورة صغيرة','لما بدنا ضغط lossy'],a:1,e:'Global = T واحد ما بيزبط مع إضاءة مختلفة بمناطق الصورة.'},
+{q:'صورة 5×5 بعد replication padding لـ window 3×3 بتصير:',o:['5×5','6×6','7×7','9×9'],a:2,e:'صف فوق وتحت وعمود يمين ويسار: 7×7.'},
+{q:'Window = [[50,50,55],[50,50,55],[45,45,50]] و C = 2 (Mean). شو T؟',o:['50','52','48','45'],a:2,e:'450 / 9 = 50، و 50 − 2 = 48.'},
+{q:'إذا الصورة فاتحة جدًا، C لازم يكون:',o:['أكبر','أصغر','صفر دايمًا','سالب'],a:0,e:'Bright → larger C (stronger subtraction).'},
+{q:'بالـ Gaussian adaptive، الـ pixels القريبة من المركز:',o:['وزنها أقل','وزنها أكبر','وزنها نفس الباقي','بتنحذف'],a:1,e:'Closer to center → higher weight، فالـ noise البعيد تأثيره أقل.'},
+{q:'وزن المركز بالـ Gaussian kernel 3×3 بالسلايد:',o:['0.0625','0.125','0.25','0.5'],a:2,e:'[[0.0625,0.125,0.0625],[0.125,0.25,0.125],[0.0625,0.125,0.0625]].'},
+{q:'بعد ما نختار الـ window، الخطوة اللي بعدها:',o:['Padding','Compute local mean','Convert to grayscale','Compare and binarize'],a:1,e:'Grayscale → Padding → Window → Local mean → C → Binarize.'}
+]});
+
+/* ===== Lesson 7 ===== */
+L.push({t:'Histogram و Kapur و Edges',h:'Histograms, Kapur, Edge Detection',intro:'توزيع البكسلات، اختيار T بالـ entropy، والحواف بالـ Sobel.',
+html:()=>`
+<div class="sec"><div>
+<h3>Histogram و Normalized Histogram</h3>
+<p><b>Histogram</b>: محور x = قيمة الـ pixel، محور y = كم pixel إلها هالقيمة. بيقلك الصورة غامقة ولا فاتحة، قديش القيم منتشرة، وقديش مناسبة للـ thresholding.</p>
+<p>نوعين: <b>Grayscale histogram</b> (للسطوع والـ global thresholding) و <b>Color histogram</b> (3 histograms: R و G و B).</p>
+<p><b>Normalized</b>: بدل العدد، الاحتمال: <span class="mono">p(i) = count(i) / N</span>، و N = W × H. ومجموعهم = 1.</p>
+<pre>plt.hist(img.ravel(), 256, [0, 256])
+# ravel: 2D → 1D ، 256 bins ، range [0,256]</pre>
+<p class="mute">عدّل أي رقم بالمصفوفة (0 لـ 4) وشوف كل شي بيتحدث.</p>
+</div><div class="lab">
+<div class="duo"><div><div class="t">Image 5×5</div><div class="scroll" id="k5"></div></div><div id="kh" style="display:grid;gap:6px;align-content:start"></div></div>
+<div class="ctl"><button class="b" id="kx1">مثال Kapur (السلايد)</button><button class="b" id="kx2">مثال ثاني</button></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Kapur's Entropy Thresholding ⭐</h3>
+<p>بيختار T اللي بيعطي <b>أكبر كمية معلومات (entropy)</b>.</p>
+<p><b>Background</b> = ≤ T ، <b>Foreground</b> = &gt; T</p>
+<p class="mono">T* = arg max ( H_bg + H_fg )<br>H = − Σ p log₂(p)</p>
+<p>الخطوات: نقسم ← نطبّع الاحتمالات <b>جوّا كل منطقة</b> (نقسم على مجموعها) ← نحسب H لكل منطقة ← نجمع ← ناخذ الأكبر.</p>
+<p class="note">💡 منطقة فيها مستوى واحد ← H = 0. مستويين بنفس الاحتمال ← H = 1.</p>
+</div><div class="lab">
+<div class="ctl" id="kts"></div>
+<div class="calc" id="kw" style="font-size:14px"></div>
+<div class="scroll"><table class="t" id="ktab"></table></div>
+</div></div>
+
+<div class="sec"><div>
+<h3>Edge Detection</h3>
+<p>البحث عن أماكن فيها <b>تغيّر حاد وسريع</b> بقيمة الـ pixel (غامق لفاتح، أو لون للون). هاي الـ <b>edges</b> وغالبًا هي <b>حدود الأجسام</b>.</p>
+<p>استخداماتها: boundary detection، feature extraction، و preprocessing للـ segmentation.</p>
+<p>⭐ التقنيات الخمس: <b>Sobel · Prewitt · Canny · Laplacian of Gaussian (LoG) · Roberts Cross</b>.</p>
+<h3 style="margin-top:14px">Sobel ⭐</h3>
+<p>بيقيس الـ <b>gradient</b> (قديش القيمة بتتغير).</p>
+<p class="note"><b>Gx</b> = تغيّر <b>أفقي</b> ← بيلاقي حواف <b>عمودية</b>.<br><b>Gy</b> = تغيّر <b>عمودي</b> ← بيلاقي حواف <b>أفقية</b>.</p>
+<p class="mono">G = √(Gx² + Gy²) ، θ = arctan(Gy / Gx)</p>
+</div><div class="lab">
+<div class="ctl" id="spre"></div>
+<div class="duo"><div><div class="t">I (عدّل)</div><table class="mat" id="sin"></table></div><div class="fig" style="min-height:170px"><svg id="ssv"></svg></div></div>
+<div class="duo"><div><div class="t">Gx kernel × I</div><div class="scroll" id="sgx"></div></div><div><div class="t">Gy kernel × I</div><div class="scroll" id="sgy"></div></div></div>
+<div class="calc" id="sout" style="font-size:14.5px"></div>
+</div></div>`,
+init(R){
+ const ex1=[[1,1,2,2,2],[1,1,2,3,3],[0,0,2,3,3],[0,0,1,4,4],[0,0,1,4,4]],ex2=[[0,0,1,1,2],[1,2,2,2,3],[2,3,3,3,3],[3,3,3,3,4],[4,4,4,0,1]];
+ let K=ex1.map(r=>[...r]),kt=2;
+ const H=a=>{const s=a.reduce((x,y)=>x+y,0);if(s===0)return null;return a.reduce((h,p)=>p>0?h-(p/s)*Math.log2(p/s):h,0)};
+ const kap=()=>{const f=K.flat(),N=f.length,h=[0,1,2,3,4].map(i=>f.filter(v=>v===i).length),p=h.map(c=>c/N);
+  $('#k5',R).innerHTML=`<table class="mat">${K.map((r,y)=>`<tr>${r.map((v,x)=>`<td class="${v<=kt?'bg0':'fg0'}"><input type="number" min="0" max="4" value="${v}" data-y="${y}" data-x="${x}" aria-label="pixel ${y} ${x}"></td>`).join('')}</tr>`).join('')}</table>`;
+  $$('#k5 input',R).forEach(e=>e.onchange=()=>{K[+e.dataset.y][+e.dataset.x]=clamp(Math.round(+e.value||0),0,4);kap()});
+  const hm=Math.max(...h,1);$('#kh',R).innerHTML=`<div class="t">i · count · p(i)</div>`+h.map((c,i)=>`<div class="hrow"><span>${i}</span><span><i style="width:${c/hm*100}%;background:${i<=kt?'var(--b)':'var(--r)'}"></i></span><span>${c} · ${r2(p[i])}</span></div>`).join('')+`<div class="mono" style="font-size:13px">Σp = ${r2(p.reduce((a,b)=>a+b,0))}</div>`;
+  const rows=[0,1,2,3].map(T=>{const b=p.slice(0,T+1),g=p.slice(T+1);return{T,b:H(b),g:H(g)}});rows.forEach(r=>r.t=(r.b??0)+(r.g??0));const mx=Math.max(...rows.map(r=>r.t));
+  $('#ktab',R).innerHTML=`<tr><th>T</th><th>BG</th><th>FG</th><th>H_bg</th><th>H_fg</th><th>H_total</th></tr>`+rows.map(r=>`<tr class="${Math.abs(r.t-mx)<1e-9?'best':''}"><td class="n">${r.T}</td><td class="n">{${[0,1,2,3,4].filter(i=>i<=r.T)}}</td><td class="n">{${[0,1,2,3,4].filter(i=>i>r.T)}}</td><td class="n">${r.b==null?'–':r2(r.b)}</td><td class="n">${r.g==null?'–':r2(r.g)}</td><td class="n">${r2(r.t)}</td></tr>`).join('');
+  const b=p.slice(0,kt+1),g=p.slice(kt+1),sb=b.reduce((x,y)=>x+y,0),sg=g.reduce((x,y)=>x+y,0);const nb=b.map(v=>sb?v/sb:0),ng=g.map(v=>sg?v/sg:0);
+  $('#kw',R).innerHTML=`T = ${kt}: BG sum = ${r2(sb)} ، FG sum = ${r2(sg)}<br>p̃_bg = {${nb.map(v=>r2(v)).join(', ')}} → H_bg = <b>${r2(H(b)??0)}</b><br>p̃_fg = {${ng.map(v=>r2(v)).join(', ')}} → H_fg = <b>${r2(H(g)??0)}</b><br>H_total = <b>${r2((H(b)??0)+(H(g)??0))}</b> · الأكبر بالجدول = ${r2(mx)} عند T = ${rows.filter(r=>Math.abs(r.t-mx)<1e-9).map(r=>r.T).join(' أو ')}`};
+ $('#kts',R).innerHTML=[0,1,2,3].map(t=>`<button class="b ${t===2?'on':''}" data-t="${t}">T = ${t}</button>`).join('');
+ $$('#kts button',R).forEach(b=>b.onclick=()=>{kt=+b.dataset.t;$$('#kts button',R).forEach(x=>x.classList.toggle('on',x===b));kap()});
+ $('#kx1',R).onclick=()=>{K=ex1.map(r=>[...r]);kap()};$('#kx2',R).onclick=()=>{K=ex2.map(r=>[...r]);kap()};kap();
+ const GX=[[-1,0,1],[-2,0,2],[-1,0,1]],GY=[[1,2,1],[0,0,0],[-1,-2,-1]];
+ const pres=[['السلايد',[[10,10,20],[10,50,20],[10,10,20]]],['حافة عمودية',[[10,10,90],[10,10,90],[10,10,90]]],['حافة أفقية',[[90,90,90],[10,10,10],[10,10,10]]],['قطرية',[[10,10,90],[10,90,90],[90,90,90]]],['مسطحة',[[50,50,50],[50,50,50],[50,50,50]]]];
+ let S=pres[0][1].map(r=>[...r]);
+ $('#spre',R).innerHTML=pres.map((p,i)=>`<button class="b ${i?'':'on'}" data-i="${i}">${p[0]}</button>`).join('');
+ const sob=()=>{const gx=GX.map((r,y)=>r.map((k,x)=>k*S[y][x])),gy=GY.map((r,y)=>r.map((k,x)=>k*S[y][x]));const Gx=gx.flat().reduce((a,b)=>a+b,0),Gy=gy.flat().reduce((a,b)=>a+b,0),G=Math.hypot(Gx,Gy);const th=Gx===0&&Gy===0?null:Math.atan2(Gy,Gx)*180/Math.PI;
+  $('#sgx',R).innerHTML=mat(gx);$('#sgy',R).innerHTML=mat(gy);
+  const thTxt=th==null?'غير معرّفة (ما في تغيّر)':Gx===0?`arctan(${Gy}/0) = ${r2(th)}°`:`arctan(${Gy}/${Gx}) = ${r2(Math.atan(Gy/Gx)*180/Math.PI)}°`;
+  const kind=G===0?'ما في edge':Math.abs(Gx)>=Math.abs(Gy)*2?'تغيّر أفقي ← edge عمودي':Math.abs(Gy)>=Math.abs(Gx)*2?'تغيّر عمودي ← edge أفقي':'edge قطري';
+  $('#sout',R).innerHTML=`Gx = ${Gx} ، Gy = ${Gy}<br>G = √(${Gx}² + ${Gy}²) = <b>${r2(G)}</b><br>θ = ${thTxt}<br><b>${kind}</b>`;
+  const sv=$('#ssv',R),W=sv.clientWidth,Hh=sv.clientHeight;if(!W)return;const cx=W/2,cy=Hh/2,L=Math.min(W,Hh)/2-14;let s=`<circle cx="${cx}" cy="${cy}" r="${L}" fill="none" stroke="var(--line)"/>`;
+  if(th!=null){const a=th*Math.PI/180,ux=Math.cos(a),uy=-Math.sin(a);s+=`<line x1="${cx-uy*L}" y1="${cy+ux*L}" x2="${cx+uy*L}" y2="${cy-ux*L}" stroke="#e0a800" stroke-width="6" stroke-linecap="round"/><line x1="${cx}" y1="${cy}" x2="${cx+ux*L*.8}" y2="${cy+uy*L*.8}" stroke="var(--b)" stroke-width="3"/><circle cx="${cx+ux*L*.8}" cy="${cy+uy*L*.8}" r="5" fill="var(--b)"/>`}
+  sv.innerHTML=s+`<text x="4" y="${Hh-6}" style="font-size:12px">أزرق: gradient ، أصفر: edge</text>`};
+ const si=()=>{$('#sin',R).innerHTML=S.map((r,y)=>`<tr>${r.map((v,x)=>`<td><input type="number" value="${v}" data-y="${y}" data-x="${x}" aria-label="I ${y} ${x}"></td>`).join('')}</tr>`).join('');$$('#sin input',R).forEach(e=>e.oninput=()=>{S[+e.dataset.y][+e.dataset.x]=+e.value||0;sob()});sob()};
+ $$('#spre button',R).forEach(b=>b.onclick=()=>{S=pres[+b.dataset.i][1].map(r=>[...r]);$$('#spre button',R).forEach(x=>x.classList.toggle('on',x===b));si()});
+ const ro4=mkRO(sob);ro4.observe($('#ssv',R));si();
+},
+quiz:[
+{q:'بالـ normalized histogram، p(i) =',o:['count(i) × N','count(i) / N','N / count(i)','count(i) / 255'],a:1,e:'N = عدد البكسلات الكلي = W × H.'},
+{q:'بـ Kapur، الـ background هي البكسلات اللي قيمتها:',o:['> T','≤ T','= T بس','≥ 255'],a:1,e:'Background ≤ T ، Foreground > T.'},
+{q:'Entropy لمنطقة احتمالاتها {0.5, 0.5}:',o:['0','0.5','1','2'],a:2,e:'−(0.5·(−1) + 0.5·(−1)) = 1 bit.'},
+{q:'Kapur بيختار الـ T اللي:',o:['بيقلل H_bg + H_fg','بيكبر H_bg + H_fg','بيخلي H_bg = H_fg','بيساوي متوسط البكسلات'],a:1,e:'T = arg max (H_bg + H_fg).'},
+{q:'الـ Gx kernel بـ Sobel بيكشف:',o:['تغيّر عمودي ← edges أفقية','تغيّر أفقي ← edges عمودية','الألوان','الـ noise'],a:1,e:'Horizontal change → vertical edges.'},
+{q:'Gx = 40 و Gy = 0. شو G و θ؟',o:['G = 40 ، θ = 0°','G = 1600 ، θ = 90°','G = 40 ، θ = 90°','G = 20 ، θ = 0°'],a:0,e:'√(40² + 0²) = 40، arctan(0/40) = 0° ← edge عمودي.'},
+{q:'أي وحدة <b>مش</b> من تقنيات الـ edge detection الخمس بالسلايد؟',o:['Prewitt','Canny','Otsu','Roberts Cross'],a:2,e:'الخمس: Sobel, Prewitt, Canny, LoG, Roberts Cross.'}
+]});
+
+/* ---------- app shell ---------- */
+const need=q=>Math.ceil(q.length*.8);
+const unlocked=i=>i===0||!!store.all||store.passed[i-1];
+const rail=()=>{$('#rail').innerHTML=L.map((l,i)=>`<button class="chip ${i===cur?'on':''} ${store.passed[i]?'done':''} ${unlocked(i)?'':'lock'}" data-i="${i}" ${unlocked(i)?'':'aria-disabled="true"'}><b>${store.passed[i]?'✓':unlocked(i)?i+1:'🔒'}</b>${l.t}</button>`).join('');
+ $$('#rail .chip').forEach(b=>b.onclick=()=>go(+b.dataset.i));$('#openall').textContent=store.all?'رجّع قفل الدروس':'افتح كل الدروس';const n=store.passed.filter(Boolean).length;$('#mtxt').textContent=`${n} من 7`;$('#mbar').style.width=`${n/7*100}%`;
+ const on=$('#rail .chip.on');if(on)on.scrollIntoView({block:'nearest',inline:'nearest'})};
+let cur=0;
+function quizHTML(i){const q=L[i].quiz;return`<section class="quiz" id="quiz"><h2>اختبار الدرس ${i+1}</h2><p>جاوب على ${q.length} أسئلة. لازم ${need(q)} صح على الأقل عشان ${i<6?'ينفتح الدرس الجاي':'تخلّص المختبر'}.${store.best[i]?` أفضل نتيجة إلك: ${store.best[i]} / ${q.length}`:''}</p>
+${q.map((x,k)=>`<div class="q" data-k="${k}"><div class="qt">${k+1}. ${x.q}</div><div class="opts">${x.o.map((o,j)=>`<button data-j="${j}">${o}</button>`).join('')}</div><div class="ex">${x.e}</div></div>`).join('')}
+<div class="qres"><button class="b main" id="check">صحّح</button><button class="b" id="retry" style="display:none">جرّب مرة ثانية</button><span class="score" id="score"></span><span id="qmsg"></span></div></section>`}
+function bindQuiz(i){const q=L[i].quiz,ans=new Array(q.length).fill(-1);let done=false;
+ $$('#quiz .q').forEach(el=>{const k=+el.dataset.k;$$('.opts button',el).forEach(b=>b.onclick=()=>{if(done)return;ans[k]=+b.dataset.j;$$('.opts button',el).forEach(x=>x.classList.toggle('pick',x===b))})});
+ $('#check').onclick=()=>{if(ans.includes(-1)){toast('في أسئلة لسا ما جاوبتها');return}done=true;let s=0;$$('#quiz .q').forEach(el=>{const k=+el.dataset.k;el.classList.add('shown');$$('.opts button',el).forEach(b=>{const j=+b.dataset.j;b.classList.remove('pick');if(j===q[k].a)b.classList.add('right');else if(j===ans[k])b.classList.add('wrong')});if(ans[k]===q[k].a)s++});
+  store.best[i]=Math.max(store.best[i]||0,s);const ok=s>=need(q);$('#score').textContent=`${s} / ${q.length}`;$('#check').style.display='none';$('#retry').style.display='';
+  if(ok){const first=!store.passed[i];store.passed[i]=true;save();rail();$('#qmsg').innerHTML=i<6?`ممتاز، فاهم الدرس. <button class="b main" id="next">الدرس ${i+2}: ${L[i+1].t} ←</button>`:'خلّصت المختبر كله. راجع الأسئلة اللي غلطت فيها قبل الامتحان.';const n=$('#next');if(n)n.onclick=()=>go(i+1);if(first&&i<6)toast(`انفتح الدرس ${i+2}`)}
+  else{save();$('#qmsg').textContent=`بدك ${need(q)} على الأقل. اقرأ الشرح تحت كل سؤال غلط، ارجع للأداة، وجرب مرة ثانية.`}};
+ $('#retry').onclick=()=>{$('#quiz').outerHTML=quizHTML(i);bindQuiz(i)}}
+function go(i,fromHash){if(!unlocked(i)){toast(`لازم تنجح باختبار الدرس ${i} أول`);return}cur=i;const l=L[i];ROs.forEach(o=>o.disconnect());ROs.length=0;
+ $('#main').innerHTML=`<div class="lead"><div><p class="mute" style="margin:0">الدرس ${i+1} من 7 · <span class="en" style="font-weight:500">${l.h}</span></p><h2>${l.t}</h2><p style="margin:0">${l.intro}</p></div><div class="ctl" style="justify-content:flex-end"><a class="b" href="#quiz" style="text-decoration:none;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid var(--line);color:var(--ink)">روح للاختبار ↓</a></div></div>${l.html()}${quizHTML(i)}`;
+ try{l.init($('#main'))}catch(e){console.error(e)}bindQuiz(i);rail();if(!fromHash){try{history.replaceState(null,'','#lesson-'+(i+1))}catch(e){}window.scrollTo({top:0})}}
+$('#openall').onclick=()=>{store.all=!store.all;save();if(!unlocked(cur))cur=0;go(cur,true);toast(store.all?'انفتحت كل الدروس. الاختبارات لسا موجودة إذا بدك تتأكد من حالك.':'رجع القفل: كل درس بينفتح بعد ما تنجح باختبار اللي قبله.')};
+$('#reset').onclick=()=>{if($('#reset').dataset.c){store={passed:[false,false,false,false,false,false,false],best:[0,0,0,0,0,0,0],all:false};save();delete $('#reset').dataset.c;$('#reset').textContent='ابدأ من الأول';go(0)}else{$('#reset').dataset.c=1;$('#reset').textContent='متأكد؟ اضغط مرة ثانية';setTimeout(()=>{delete $('#reset').dataset.c;$('#reset').textContent='ابدأ من الأول'},3000)}};
+const fromH=()=>{const m=/^#lesson-(\d)$/.exec(location.hash);if(m){const i=+m[1]-1;if(i>=0&&i<7&&unlocked(i))return i}let j=0;while(j<6&&store.passed[j])j++;return j};
+window.addEventListener('hashchange',()=>{if(!/^#lesson-\d$/.test(location.hash))return;const i=fromH();if(i!==cur)go(i,true)});
+go(fromH(),true);
+}
+</script>
+</body>
+</html>
