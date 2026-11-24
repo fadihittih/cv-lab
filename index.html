@@ -127,7 +127,7 @@ svg text{font-family:"IBM Plex Mono",monospace;font-size:13px;fill:var(--ink);pa
 .toast.on{opacity:1}
 footer{color:var(--mute);font-size:14px}
 @media(max-width:820px){.sec,.lead{grid-template-columns:minmax(0,1fr)}.meter .bar{width:110px}}
-@media(max-width:480px){.trio{grid-template-columns:repeat(2,minmax(0,1fr))}.bits button{font-size:18px;min-height:52px}label.sl{grid-template-columns:minmax(0,1fr) 4em}label.sl input{grid-column:1/-1;grid-row:2}}
+@media(max-width:480px){.trio{gap:6px}.bits button{font-size:18px;min-height:52px}label.sl{grid-template-columns:minmax(0,1fr) 4em}label.sl input{grid-column:1/-1;grid-row:2}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -763,9 +763,10 @@ html:()=>`
 <p class="mono">T* = arg max ( H_bg + H_fg )<br>H = − Σ p log₂(p)</p>
 <p>الخطوات: نقسم ← نطبّع الاحتمالات <b>جوّا كل منطقة</b> (نقسم على مجموعها) ← نحسب H لكل منطقة ← نجمع ← ناخذ الأكبر.</p>
 <p class="note">💡 منطقة فيها مستوى واحد ← H = 0. مستويين بنفس الاحتمال ← H = 1.</p>
+<p class="note">⚠️ السلايد بيقول الجواب T = 1 أو T = 2، لأنه قرّب الاثنين لـ 2.57. بالحساب الدقيق T = 2 أعلى بشوي (2.580 مقابل 2.577). بالامتحان اكتب زي السلايد: T = 1 أو 2.</p>
 </div><div class="lab">
 <div class="ctl" id="kts"></div>
-<div class="calc" id="kw" style="font-size:14px"></div>
+<div class="calc" id="kw" dir="ltr" style="font-size:14px;text-align:left"></div>
 <div class="scroll"><table class="t" id="ktab"></table></div>
 </div></div>
 
@@ -780,7 +781,7 @@ html:()=>`
 <p class="mono">G = √(Gx² + Gy²) ، θ = arctan(Gy / Gx)</p>
 </div><div class="lab">
 <div class="ctl" id="spre"></div>
-<div class="duo"><div><div class="t">I (عدّل)</div><table class="mat" id="sin"></table></div><div class="fig" style="min-height:170px"><svg id="ssv"></svg></div></div>
+<div class="duo"><div><div class="t">I (عدّل)</div><table class="mat" id="sin"></table></div><div><div class="fig" style="min-height:170px"><svg id="ssv"></svg></div><div class="cap"><span style="color:var(--b)">●</span> gradient &nbsp; <span style="color:#e0a800">●</span> edge</div></div></div>
 <div class="duo"><div><div class="t">Gx kernel × I</div><div class="scroll" id="sgx"></div></div><div><div class="t">Gy kernel × I</div><div class="scroll" id="sgy"></div></div></div>
 <div class="calc" id="sout" style="font-size:14.5px"></div>
 </div></div>`,
@@ -793,9 +794,9 @@ init(R){
   $$('#k5 input',R).forEach(e=>e.onchange=()=>{K[+e.dataset.y][+e.dataset.x]=clamp(Math.round(+e.value||0),0,4);kap()});
   const hm=Math.max(...h,1);$('#kh',R).innerHTML=`<div class="t">i · count · p(i)</div>`+h.map((c,i)=>`<div class="hrow"><span>${i}</span><span><i style="width:${c/hm*100}%;background:${i<=kt?'var(--b)':'var(--r)'}"></i></span><span>${c} · ${r2(p[i])}</span></div>`).join('')+`<div class="mono" style="font-size:13px">Σp = ${r2(p.reduce((a,b)=>a+b,0))}</div>`;
   const rows=[0,1,2,3].map(T=>{const b=p.slice(0,T+1),g=p.slice(T+1);return{T,b:H(b),g:H(g)}});rows.forEach(r=>r.t=(r.b??0)+(r.g??0));const mx=Math.max(...rows.map(r=>r.t));
-  $('#ktab',R).innerHTML=`<tr><th>T</th><th>BG</th><th>FG</th><th>H_bg</th><th>H_fg</th><th>H_total</th></tr>`+rows.map(r=>`<tr class="${Math.abs(r.t-mx)<1e-9?'best':''}"><td class="n">${r.T}</td><td class="n">{${[0,1,2,3,4].filter(i=>i<=r.T)}}</td><td class="n">{${[0,1,2,3,4].filter(i=>i>r.T)}}</td><td class="n">${r.b==null?'–':r2(r.b)}</td><td class="n">${r.g==null?'–':r2(r.g)}</td><td class="n">${r2(r.t)}</td></tr>`).join('');
+  $('#ktab',R).innerHTML=`<tr><th>T</th><th>BG | FG</th><th>H_bg</th><th>H_fg</th><th>H_total</th></tr>`+rows.map(r=>`<tr class="${Math.abs(r.t-mx)<1e-6?'best':''}"><td class="n">${r.T}</td><td class="n" style="font-size:13px">${[0,1,2,3,4].filter(i=>i<=r.T).join('')} | ${[0,1,2,3,4].filter(i=>i>r.T).join('')}</td><td class="n">${r.b==null?'–':r2(r.b)}</td><td class="n">${r.g==null?'–':r2(r.g)}</td><td class="n">${(Math.round(r.t*1000)/1000).toFixed(3)}</td></tr>`).join('');
   const b=p.slice(0,kt+1),g=p.slice(kt+1),sb=b.reduce((x,y)=>x+y,0),sg=g.reduce((x,y)=>x+y,0);const nb=b.map(v=>sb?v/sb:0),ng=g.map(v=>sg?v/sg:0);
-  $('#kw',R).innerHTML=`T = ${kt}: BG sum = ${r2(sb)} ، FG sum = ${r2(sg)}<br>p̃_bg = {${nb.map(v=>r2(v)).join(', ')}} → H_bg = <b>${r2(H(b)??0)}</b><br>p̃_fg = {${ng.map(v=>r2(v)).join(', ')}} → H_fg = <b>${r2(H(g)??0)}</b><br>H_total = <b>${r2((H(b)??0)+(H(g)??0))}</b> · الأكبر بالجدول = ${r2(mx)} عند T = ${rows.filter(r=>Math.abs(r.t-mx)<1e-9).map(r=>r.T).join(' أو ')}`};
+  $('#kw',R).innerHTML=`T = ${kt}: BG sum = ${r2(sb)} ، FG sum = ${r2(sg)}<br>p̃_bg = {${nb.map(v=>r2(v)).join(', ')}} → H_bg = <b>${r2(H(b)??0)}</b><br>p̃_fg = {${ng.map(v=>r2(v)).join(', ')}} → H_fg = <b>${r2(H(g)??0)}</b><br>H_total = <b>${r2((H(b)??0)+(H(g)??0))}</b><br>max H_total = ${r2(mx)} at T = ${rows.filter(r=>Math.abs(r.t-mx)<1e-6).map(r=>r.T).join(' or ')}`};
  $('#kts',R).innerHTML=[0,1,2,3].map(t=>`<button class="b ${t===2?'on':''}" data-t="${t}">T = ${t}</button>`).join('');
  $$('#kts button',R).forEach(b=>b.onclick=()=>{kt=+b.dataset.t;$$('#kts button',R).forEach(x=>x.classList.toggle('on',x===b));kap()});
  {const N=96,gimg=sunset(N),cimg=(x,y)=>{const v=gimg[y*N+x];const hz=N*.56;if(y<hz)return[clamp(v*1.15,0,255),clamp(v*.75,0,255),clamp(200-v*.5,0,255)];return[clamp(v*.5,0,255),clamp(v*.9+20,0,255),clamp(v*.45,0,255)]};let gm=true;
@@ -817,7 +818,7 @@ init(R){
   $('#sout',R).innerHTML=`Gx = ${Gx} ، Gy = ${Gy}<br>G = √(${Gx}² + ${Gy}²) = <b>${r2(G)}</b><br>θ = ${thTxt}<br><b>${kind}</b>`;
   const sv=$('#ssv',R),W=sv.clientWidth,Hh=sv.clientHeight;if(!W)return;const cx=W/2,cy=Hh/2,L=Math.min(W,Hh)/2-14;let s=`<circle cx="${cx}" cy="${cy}" r="${L}" fill="none" stroke="var(--line)"/>`;
   if(th!=null){const a=th*Math.PI/180,ux=Math.cos(a),uy=-Math.sin(a);s+=`<line x1="${cx-uy*L}" y1="${cy+ux*L}" x2="${cx+uy*L}" y2="${cy-ux*L}" stroke="#e0a800" stroke-width="6" stroke-linecap="round"/><line x1="${cx}" y1="${cy}" x2="${cx+ux*L*.8}" y2="${cy+uy*L*.8}" stroke="var(--b)" stroke-width="3"/><circle cx="${cx+ux*L*.8}" cy="${cy+uy*L*.8}" r="5" fill="var(--b)"/>`}
-  sv.innerHTML=s+`<text x="4" y="${Hh-6}" style="font-size:12px">أزرق: gradient ، أصفر: edge</text>`};
+  sv.innerHTML=s};
  const si=()=>{$('#sin',R).innerHTML=S.map((r,y)=>`<tr>${r.map((v,x)=>`<td><input type="number" value="${v}" data-y="${y}" data-x="${x}" aria-label="I ${y} ${x}"></td>`).join('')}</tr>`).join('');$$('#sin input',R).forEach(e=>e.oninput=()=>{S[+e.dataset.y][+e.dataset.x]=+e.value||0;sob()});sob()};
  $$('#spre button',R).forEach(b=>b.onclick=()=>{S=pres[+b.dataset.i][1].map(r=>[...r]);$$('#spre button',R).forEach(x=>x.classList.toggle('on',x===b));si()});
  const ro4=mkRO(sob);ro4.observe($('#ssv',R));si();
