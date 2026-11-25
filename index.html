@@ -580,6 +580,7 @@ ${range('al','α',0,1,.7,.05)}${range('be','β',0,1,.3,.05)}${range('ga','γ',-6
 <h3>Thresholding</h3>
 <p><b>Object</b>: منطقة مميزة بنهتم فيها (شخص، قمر). <b>Segmentation</b>: تقسيم الصورة لمناطق متشابهة عشان نفصل الجسم عن الخلفية، وهي أول خطوة بكثير مهام.</p>
 <p><b>Thresholding</b> = أبسط segmentation: بيحول <b class="en">grayscale → binary</b>. كل pixel بينقارن بـ T.</p>
+<p class="note"><b>الـ T من وين؟</b> يا إما <b>منختاره إحنا</b> (الأشهر 127، نص المدى 0 لـ 255، وهيك بالكود <code>cv2.threshold(img, 127, 255, ...)</code>)، يا إما <b>بنحسبه من الصورة</b>: <b>Mean</b> أو <b>Median</b> (تحت بهاد الدرس)، أو T لكل pixel من جيرانه بالـ <b>Adaptive</b> (درس 6)، أو بالـ <b>Kapur</b> (درس 7). بالامتحان إذا ما عطاك T، بيكون بدك تحسبه بوحدة من هالطرق.</p>
 <div class="scroll"><table class="t" id="ttab"><tr><th>Type</th><th>إذا &gt; T</th><th>غير هيك</th></tr></table></div>
 <p class="mute">🧠 TRUNC = قصّ الراس. TOZERO = الغامق بيصير صفر. TOZERO_INV = الفاتح بيصير صفر.</p>
 <details><summary style="cursor:pointer;min-height:44px;display:flex;align-items:center"><b>كود السلايد كامل: الأنواع الخمسة مع الرسم</b></summary>
